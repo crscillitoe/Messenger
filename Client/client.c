@@ -98,6 +98,14 @@ int main(int argc, char* argv[])
 
 
 
+        // Write request to server socket
+        if(write(serverSocket, get_request, strlen(get_request)) < 0)
+        {
+                fprintf(stderr, "Write returned an error: %s\n", strerror(errno));
+                exit(1);
+        }
 
 
+
+        free(s);
 }
