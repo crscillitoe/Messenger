@@ -109,11 +109,8 @@ void* updateClients(void* val) {
 	printf("Current value of pastVal : %s\n" , pastVal.c_str());
         while(1) {
 
-		usleep(3000000);
+		usleep(5000);
 		pthread_mutex_lock(&lock);
-		printf("toSend : %s\n" , toSend.c_str());
-		printf("pastVal : %s\n" , pastVal.c_str());
-		printf("Equal? : %d\n" , toSend == pastVal);
 
                 if(toSend != pastVal) { //If the messages are different
                         int i;
