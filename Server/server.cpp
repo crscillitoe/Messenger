@@ -32,11 +32,16 @@ int main(int argc, const char *argv[]) {
 
         struct sockaddr_in serverAddress;
 
-        if(argc != 2) {
+        if(argc != 2 && argc != 1) {
                 printf("INVALID SYNTAX\n");
                 printf("Valid syntax : %s PORT\n" , argv[0]);
+		printf("OR : %s\n" , argv[0]);
                 return -1; //Indicate FAILURE.
         }
+
+	if(argc == 1) {
+		argv[1] = "8371";
+	}
 
         //Initialize the mutex variable, lock.
         if(pthread_mutex_init(&lock , NULL) != 0) {
