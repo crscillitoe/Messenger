@@ -19,6 +19,7 @@ pthread_mutex_t lock;
 int totalConnectedClients = 0;
 int socketDescriptors[MAX_CONNECTIONS];
 
+string pastVal;
 string toSend;
 void* updateClients(void* val);
 int main(int argc, const char *argv[]) {
@@ -103,12 +104,13 @@ int main(int argc, const char *argv[]) {
                         pthread_mutex_unlock(&lock);
 
                         while(running) {
-                        read(clientSocket , buffer , MAX_MESSAGE_SIZE);
+				read(clientSocket , buffer , MAX_MESSAGE_SIZE);
 				printf("BUFFER : %s\n" , buffer);
                                 string bufferCPPString = buffer;
                                 pthread_mutex_lock(&lock);
-                                        toSend = buffer;
+                                        toSend = bufferCPPString;
 					printf("toSend : %s\n" , toSend.c_str());
+					printf("pastVal : %s\n" , pastVal.c_str());
                                 pthread_mutex_unlock(&lock);
                                 if(bufferCPPString == "EXIT") {
                                         running = 0;
@@ -149,19 +151,24 @@ int main(int argc, const char *argv[]) {
 
 void* updateClients(void* val) {
 	printf("updateClients has started!\n");
-        string pastVal;
-        pastVal = toSend;
+	printf("Current value of pastVal : %s\n" , pastVal.c_str());
         while(1) {
-                if(strcmp(toSend.c_str() , pastVal.c_str()) != 0) { //If the current message$
-                        pthread_mutex_lock(&lock);
+
+		usleep(500000);
+		printf("toSend : %s\n" , toSend.c_str());
+		printf("pastVal : %s\n" , pastVal.c_str());
+		printf("Equal? : %d\n" , toSend == pastVal);
+
+		pthread_mutex_lock(&lock);
+                if(toSend != pastVal) { //If the messages are different
                         int i;
-			printf("%s\n" , toSend.c_str());
+			printf("UPDATECLIENTS TOSEND: %s\n" , toSend.c_str());
                         for(i = 0 ; i < totalConnectedClients ; i++) {
                                 write(socketDescriptors[i] , toSend.c_str() , toSend.length());
                         }
                         pastVal = toSend;
-                        pthread_mutex_unlock(&lock);
                 }
+		pthread_mutex_unlock(&lock);
         }
 }
 
