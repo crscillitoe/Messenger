@@ -122,7 +122,7 @@ int main(int argc, char* argv[])
                 strcat(message_to_send, userinput);
                 printf("%s", message_to_send);
                 // Write request to server socket
-                if(write(serverSocket, message_to_send, strlen(userinput)) < 0)
+                if(write(serverSocket, message_to_send, strlen(message_to_send)) < 0)
                 {
                         fprintf(stderr, "Write returned an error: %s\n", strerror(errno));
                         exit(1);
