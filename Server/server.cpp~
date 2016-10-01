@@ -128,6 +128,8 @@ int main(int argc, const char *argv[]) {
                                 }
                         pthread_mutex_unlock(&lock);
 
+			printf("Child with Socket ID %d has disconnected!\n" , clientSocket);
+
                         shutdown(clientSocket , SHUT_RDWR);
                         close(clientSocket);
                         return 0; //End the child process successfully!
@@ -153,6 +155,7 @@ void* updateClients(void* val) {
                 if(currVal != pastVal) { //If the current message$
                         pthread_mutex_lock(&lock);
                         int i;
+			printf("%s\n" , toSend.c_str());
                         for(i = 0 ; i < totalConnectedClients ; i++) {
                                 write(socketDescriptors[i] , toSend.c_str() , toSend.length());
                         }

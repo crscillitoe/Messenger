@@ -152,7 +152,7 @@ void* updateClients(void* val) {
         pastVal = toSend;
         while(1) {
                 currVal = toSend;
-                if(currVal != pastVal) { //If the current message$
+                if(strcmp(currVal , pastVal) != 0) { //If the current message$
                         pthread_mutex_lock(&lock);
                         int i;
 			printf("%s\n" , toSend.c_str());
