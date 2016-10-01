@@ -22,6 +22,7 @@ int socketDescriptors[MAX_CONNECTIONS];
 string pastVal;
 string toSend;
 void* updateClients(void* val);
+void* clientThread(void* val);
 int main(int argc, const char *argv[]) {
 
         short PORT;
@@ -84,62 +85,16 @@ int main(int argc, const char *argv[]) {
         }
 
        while(1) {
+		pthread_t temp;
                 clientLength = sizeof(clientAddress);
                 if((clientSocket = accept(socketDescriptor , (struct sockaddr *) &clientAddress, &clientLength)) < 0) {
                         printf("Accept() failed");
                         return -1; //Indicate FAILURE.
                 }
-                if((PID = fork()) < 0) {
-                        printf("Fork error\n");
-                        return -1; //Indicate FAILURE.
-                } else if(PID == 0) {
-                        //CHILD PROCESS
-			printf("Child with Socket ID %d has connected!\n" , clientSocket);
-                        bzero(buffer , MAX_MESSAGE_SIZE);
-                        int running = 1;
-
-                        pthread_mutex_lock(&lock);
-                                socketDescriptors[totalConnectedClients] = clientSocket;
-                                totalConnectedClients++;
-                        pthread_mutex_unlock(&lock);
-
-                        while(running) {
-				read(clientSocket , buffer , MAX_MESSAGE_SIZE);
-				printf("BUFFER : %s\n" , buffer);
-                                string bufferCPPString = buffer;
-                                pthread_mutex_lock(&lock);
-                                        toSend = bufferCPPString;
-					printf("toSend : %s\n" , toSend.c_str());
-					printf("pastVal : %s\n" , pastVal.c_str());
-                                pthread_mutex_unlock(&lock);
-                                if(bufferCPPString == "EXIT") {
-                                        running = 0;
-                                }
-                        }
-
-                        pthread_mutex_lock(&lock);
-                                totalConnectedClients--;
-                                int i;
-                                int location = 5000;
-                                for(i = 0 ; i < MAX_CONNECTIONS - 1 ; i++) {
-                                        if(socketDescriptors[i] = clientSocket) {
-                                                location = i;
-                                                break;
-                                        }
-         }
-                                for(i = location ; i < MAX_CONNECTIONS ; i++) {
-                                        socketDescriptors[i] = socketDescriptors[i + 1];
-                                }
-                        pthread_mutex_unlock(&lock);
-
-			printf("Child with Socket ID %d has disconnected!\n" , clientSocket);
-
-                        shutdown(clientSocket , SHUT_RDWR);
-                        close(clientSocket);
-                        return 0; //End the child process successfully!
-                } else {
-
-                }
+		if(pthread_create(&temp , NULL , clientThread , (void*)(&clientSocket)) != 0) {
+			printf("Pthread creation error!\n");
+			return -1; //Indicate FAILURE.
+		}
         }
 
         if(pthread_join(serverThread , NULL)) {
@@ -172,3 +127,54 @@ void* updateClients(void* val) {
         }
 }
 
+void* clientThread(void* val) {
+	int MAX_MESSAGE_SIZE = 2048;
+        char buffer[MAX_MESSAGE_SIZE];
+
+	int SOCKET_ID = *((int*)val);
+	printf("Child with Socket ID %d has connected!\n" , SOCKET_ID);
+        bzero(buffer , MAX_MESSAGE_SIZE);
+        int running = 1;
+
+                        pthread_mutex_lock(&lock);
+                                socketDescriptors[totalConnectedClients] = SOCKET_ID;
+                                totalConnectedClients++;
+                        pthread_mutex_unlock(&lock);
+
+                        while(running) {
+				bzero(buffer , MAX_MESSAGE_SIZE);
+                                read(SOCKET_ID , buffer , MAX_MESSAGE_SIZE);
+                                printf("BUFFER : %s\n" , buffer);
+                                string bufferCPPString = buffer;
+                                pthread_mutex_lock(&lock);
+                                        toSend = bufferCPPString;
+                                        printf("toSend : %s\n" , toSend.c_str());
+                                        printf("pastVal : %s\n" , pastVal.c_str());
+                                pthread_mutex_unlock(&lock);
+                                if(bufferCPPString == "EXIT") {
+                                        running = 0;
+                                }
+                        }
+
+	pthread_mutex_lock(&lock);
+                totalConnectedClients--;
+                int i;
+                int location = 5000;
+                for(i = 0 ; i < MAX_CONNECTIONS - 1 ; i++) {
+                        if(socketDescriptors[i] = SOCKET_ID) {
+                                location = i;
+                                break;
+                        }
+                }
+                for(i = location ; i < MAX_CONNECTIONS ; i++) {
+                        socketDescriptors[i] = socketDescriptors[i + 1];
+                }
+        pthread_mutex_unlock(&lock);
+
+        printf("Child with Socket ID %d has disconnected!\n" , SOCKET_ID);
+
+        shutdown(SOCKET_ID , SHUT_RDWR);
+        close(SOCKET_ID);
+
+
+}
