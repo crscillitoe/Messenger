@@ -159,7 +159,7 @@ void* updateClients(void* val) {
                         for(i = 0 ; i < totalConnectedClients ; i++) {
                                 write(socketDescriptors[i] , toSend.c_str() , toSend.length());
                         }
-                        pastVal = currVal;
+                        pastVal = toSend;
                         pthread_mutex_unlock(&lock);
                 }
         }
