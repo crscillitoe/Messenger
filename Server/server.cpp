@@ -104,9 +104,11 @@ int main(int argc, const char *argv[]) {
 
                         while(running) {
                         read(clientSocket , buffer , MAX_MESSAGE_SIZE);
+				printf("BUFFER : %s\n" , buffer);
                                 string bufferCPPString = buffer;
                                 pthread_mutex_lock(&lock);
                                         toSend = buffer;
+					printf("toSend : %s\n" , toSend.c_str());
                                 pthread_mutex_unlock(&lock);
                                 if(bufferCPPString == "EXIT") {
                                         running = 0;
@@ -146,20 +148,18 @@ int main(int argc, const char *argv[]) {
 }
 
 void* updateClients(void* val) {
-
+	printf("updateClients has started!\n");
         string pastVal;
-        string currVal;
         pastVal = toSend;
         while(1) {
-                currVal = toSend;
-                if(strcmp(currVal , pastVal) != 0) { //If the current message$
+                if(strcmp(toSend.c_str() , pastVal.c_str()) != 0) { //If the current message$
                         pthread_mutex_lock(&lock);
                         int i;
 			printf("%s\n" , toSend.c_str());
                         for(i = 0 ; i < totalConnectedClients ; i++) {
                                 write(socketDescriptors[i] , toSend.c_str() , toSend.length());
                         }
-                        pastVal = currVal;
+                        pastVal = toSend;
                         pthread_mutex_unlock(&lock);
                 }
         }
