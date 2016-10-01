@@ -58,7 +58,6 @@ int main(int argc, char* argv[])
         printf("URL = %s\n", url);
         printf("Port = %d\n", serverPort);
 
-
         
         // Socket
         if((serverSocket = socket(AF_INET, SOCK_STREAM, 0)) < 0)
@@ -94,12 +93,18 @@ int main(int argc, char* argv[])
         else
         {
                 printf("Connection Established\n");
-        }
+        } 
 
         int ex = 0;
         char userinput[2030];
+        memset(userinput, '\0', sizeof(userinput));
+
+        printf("Userinput blank: %s", userinput);
 
         char message_to_send[2048];
+
+        memset(userinput, '\0', sizeof(userinput));
+
 
         while(!ex)
         {
@@ -111,18 +116,21 @@ int main(int argc, char* argv[])
                         ex = 1;
                 }
 
-//                message_to_send[0] = '\0';   // ensures the memory is an empty string
-//    strcat(message_to_send, username);
-//    strcat(message_to_send, " : 
-//    strcat(message_to_send, str2);
+                message_to_send[0] = '\0';   // ensures the memory is an empty string
+                strcat(message_to_send, username);
+                strcat(message_to_send, ": ");
+                strcat(message_to_send, userinput);
+                printf("%s", message_to_send);
                 // Write request to server socket
-                if(write(serverSocket, userinput, strlen(userinput)) < 0)
+                if(write(serverSocket, message_to_send, strlen(userinput)) < 0)
                 {
                         fprintf(stderr, "Write returned an error: %s\n", strerror(errno));
                         exit(1);
                 }
 
         }
+
+
 
         //  free(s);
 }
