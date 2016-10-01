@@ -93,6 +93,7 @@ int main(int argc, const char *argv[]) {
                         return -1; //Indicate FAILURE.
                 } else if(PID == 0) {
                         //CHILD PROCESS
+			printf("Child with Socket ID %d has connected!\n" , clientSocket);
                         bzero(buffer , MAX_MESSAGE_SIZE);
                         int running = 1;
 
