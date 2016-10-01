@@ -96,16 +96,33 @@ int main(int argc, char* argv[])
                 printf("Connection Established\n");
         }
 
+        int ex = 0;
+        char userinput[2030];
 
+        char message_to_send[2048];
 
-        // Write request to server socket
-        if(write(serverSocket, get_request, strlen(get_request)) < 0)
+        while(!ex)
         {
-                fprintf(stderr, "Write returned an error: %s\n", strerror(errno));
-                exit(1);
+                printf("> ");
+                fgets(userinput, sizeof(userinput), stdin); 
+
+                if(strcmp(userinput, "EXIT\n") == 0)
+                {
+                        ex = 1;
+                }
+
+//                message_to_send[0] = '\0';   // ensures the memory is an empty string
+//    strcat(message_to_send, username);
+//    strcat(message_to_send, " : 
+//    strcat(message_to_send, str2);
+                // Write request to server socket
+                if(write(serverSocket, userinput, strlen(userinput)) < 0)
+                {
+                        fprintf(stderr, "Write returned an error: %s\n", strerror(errno));
+                        exit(1);
+                }
+
         }
 
-
-
-        free(s);
+        //  free(s);
 }

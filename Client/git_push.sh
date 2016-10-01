@@ -1,5 +1,5 @@
 #!/bin/sh
 
-git add .
+git remote add originHTTPS https://github.com/crscillitoe/messenger.git
 git commit -m "$1"
-git push origin master
+git push -u originHTTPS
