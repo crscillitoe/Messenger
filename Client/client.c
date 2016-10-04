@@ -9,11 +9,13 @@
 #include <sys/time.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
+#include <pthread.h>
 #include <arpa/inet.h>
 #include <errno.h>
 #include <netinet/in.h>
 #include <netdb.h>
 
+void* readThread(void* val);
 
 int main(int argc, char* argv[])
 {
@@ -79,9 +81,9 @@ int main(int argc, char* argv[])
 
         }
 
-                        bcopy ( (char*)hp->h_addr, 
-                        (char *) &serverAddr.sin_addr.s_addr, 
-                        hp->h_length);                
+                        bcopy ( (char*)hp->h_addr,
+                        (char *) &serverAddr.sin_addr.s_addr,
+                        hp->h_length);
         serverAddr.sin_port = htons(serverPort);
 
               // Connect to server socket
@@ -105,6 +107,8 @@ int main(int argc, char* argv[])
 
         memset(userinput, '\0', sizeof(userinput));
 
+	pthread_t thread;
+	pthread_create(&thread , NULL , readThread , (void*) &serverSocket);
 
         while(!ex)
         {
@@ -133,4 +137,16 @@ int main(int argc, char* argv[])
 
 
         //  free(s);
+}
+
+
+void* readThread(void* val) {
+	int socketID = *((int*)val);
+	const int MAX_MESSAGE_LENGTH = 2048;
+	char buffer[MAX_MESSAGE_LENGTH];
+	while(1) {
+		bzero(buffer , MAX_MESSAGE_LENGTH);
+		read(socketID , buffer , MAX_MESSAGE_LENGTH);
+		printf("%s" , buffer);
+	}
 }
