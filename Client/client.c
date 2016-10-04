@@ -116,6 +116,7 @@ int main(int argc, char* argv[])
 
                 if(strcmp(userinput, "EXIT\n") == 0)
                 {
+                        write(serverSocket, "EXIT", strlen("EXIT"));
                         ex = 1;
                 }
 
