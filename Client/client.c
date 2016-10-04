@@ -112,7 +112,6 @@ int main(int argc, char* argv[])
 
         while(!ex)
         {
-                printf("> ");
                 fgets(userinput, sizeof(userinput), stdin); 
 
                 if(strcmp(userinput, "EXIT\n") == 0)
@@ -124,7 +123,6 @@ int main(int argc, char* argv[])
                 strcat(message_to_send, username);
                 strcat(message_to_send, ": ");
                 strcat(message_to_send, userinput);
-                printf("%s", message_to_send);
                 // Write request to server socket
                 if(write(serverSocket, message_to_send, strlen(message_to_send)) < 0)
                 {

@@ -1,6 +1,6 @@
 CC=gcc
 CFLAGS=-c -Wall
-LDFLAGS=
+LDFLAGS=-pthread
 SOURCES=client.c
 OBJECTS=$(SOURCES:.c=.o)
 EXECUTABLE=client
