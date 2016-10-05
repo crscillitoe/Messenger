@@ -49,20 +49,19 @@ int main(int argc, char* argv[])
 
         if(argc == 5)
         {
-   //             strncpy(str_port, argv[4], 5);
                 str_port = argv[4];
                 // Convert Port from string to short
-        char *ptr;
-        serverPort = strtol(str_port, &ptr, 10);
+                char *ptr;
+                serverPort = strtol(str_port, &ptr, 10);
 
         }
         else
         {
-               serverPort = 8371;
+                serverPort = 8371;
         }
 
- //       strncpy(username, argv[2], 12);
- //       strncpy(url, argv[1], 16);
+        //       strncpy(username, argv[2], 12);
+        //       strncpy(url, argv[1], 16);
         username = argv[2];
         url = argv[1];
 
@@ -76,24 +75,24 @@ int main(int argc, char* argv[])
 
         }
 
-                // Initialize struct
+        // Initialize struct
         memset(&serverAddr, 0, sizeof(serverAddr));
         serverAddr.sin_family = AF_INET;
         hp = gethostbyname(url);
 
-                if(hp == NULL)
+        if(hp == NULL)
         {
                 fprintf(stderr, "Error: specified URL does not exist\n");
                 exit(1);
 
         }
 
-                        bcopy ( (char*)hp->h_addr,
+        bcopy ( (char*)hp->h_addr,
                         (char *) &serverAddr.sin_addr.s_addr,
                         hp->h_length);
         serverAddr.sin_port = htons(serverPort);
 
-              // Connect to server socket
+        // Connect to server socket
         if(connect(serverSocket, (struct sockaddr *) &serverAddr, sizeof(serverAddr)) < 0)
         {
 
@@ -108,46 +107,51 @@ int main(int argc, char* argv[])
 
         char message_to_send[2048];
 
-        memset(userinput, '\0', sizeof(userinput));
+        memset(message_to_send, '\0', sizeof(message_to_send));
 
-	initscr();
-	raw();
+        initscr();
+        raw();
 
-	pthread_t thread;
-	pthread_create(&thread , NULL , readThread , (void*) &serverSocket);
+        pthread_t thread;
+        pthread_create(&thread , NULL , readThread , (void*) &serverSocket);
 
         while(!ex)
         {
-		int i;
-		for(i = 1 ; i < COLS ; i++) {
-			mvprintw(1 , i , "-");
-			mvprintw(LINES - 5 , i , "-");
-			mvprintw(LINES - 3 , i , "-");
-		}
+                int i;
+                for(i = 1 ; i < COLS ; i++) {
+                        mvprintw(1 , i , "-");
+                        mvprintw(LINES - 5 , i , "-");
+                        mvprintw(LINES - 3 , i , "-");
+                }
 
-		for(i = 2 ; i < LINES ; i++) {
-			if(i != LINES-5 && i != LINES-4 && i != LINES-3) {
-				mvprintw(i , 1 , "|");
-				mvprintw(i , COLS , "|");
-				mvprintw(i , COLS - 20 , "|");
-			}
-		}
+                for(i = 2 ; i < LINES ; i++) {
+                        if(i != LINES-5 && i != LINES-4 && i != LINES-3) {
+                                mvprintw(i , 1 , "|");
+                                mvprintw(i , COLS , "|");
+                                mvprintw(i , COLS - 20 , "|");
+                        }
+                }
 
-		mvprintw(2 , COLS - 18 , "CONNECTED USERS");
+                mvprintw(2 , COLS - 18 , "CONNECTED USERS");
                 mvprintw(3 , COLS - 20 , "--------------------");
 
-		mvprintw(LINES - 4 , 1 , ">");
+                mvprintw(LINES - 4 , 1 , ">");
 
-		bzero(userinput , 2030);
-		getnstr(userinput , 2030);
+                bzero(userinput , 2030);
+                bzero(message_to_send, 2048);
+                getnstr(userinput , 2030);
 
-		for(i = 2 ; i < COLS ; i++) {
-			mvprintw(LINES - 4 , i , " ");
-		}
+                userinput[strlen(userinput)] = '\n';
 
+                for(i = 2 ; i < COLS ; i++) {
+                        mvprintw(LINES - 4 , i , " ");
+                }
+
+                mvprintw(10, 5, "Suze of User Input: %d\n", strlen(userinput));
 
                 if(strcmp(userinput, "EXIT\n") == 0)
                 {
+                        (write(serverSocket, "EXIT", strlen("EXIT")) < 0);
                         ex = 1;
                 }
 
@@ -155,83 +159,82 @@ int main(int argc, char* argv[])
                 strcat(message_to_send, username);
                 strcat(message_to_send, ": ");
                 strcat(message_to_send, userinput);
-                printf("%s", message_to_send);
+                // printf("%s", message_to_send);
                 // Write request to server socket
                 if(write(serverSocket, message_to_send, strlen(message_to_send)) < 0)
                 {
                         fprintf(stderr, "Write returned an error: %s\n", strerror(errno));
                         exit(1);
                 }
-
         }
 
-	endwin();
+        endwin();
 
         //  free(s);
 }
 
 void printn(const char* message) {
-	printf("%s\n" , message);
+        printf("%s\n" , message);
 }
 
 void* readThread(void* val) {
 
-	int socketID = *((int*)val);
-	const int MAX_MESSAGE_LENGTH = 2048;
-	char buffer[MAX_MESSAGE_LENGTH];
+        int socketID = *((int*)val);
+        const int MAX_MESSAGE_LENGTH = 2048;
+        char buffer[MAX_MESSAGE_LENGTH];
 
-	const int linesToRemember = (LINES - 7);
+        const int linesToRemember = (LINES - 7);
 
-	const int MAX_POSSIBLE_LINES_REMEMBER = 100;
+        const int MAX_POSSIBLE_LINES_REMEMBER = 100;
 
-	string lines[MAX_POSSIBLE_LINES_REMEMBER];
+        string lines[MAX_POSSIBLE_LINES_REMEMBER];
 
-	const int lineLength = (COLS - 22);
-	int linesUsed = 0;
+        const int lineLength = (COLS - 22);
+        int linesUsed = 0;
 
-	while(1) {
-		bzero(buffer , MAX_MESSAGE_LENGTH);
-		read(socketID , buffer , MAX_MESSAGE_LENGTH);
+        while(1) {
+                bzero(buffer , MAX_MESSAGE_LENGTH);
+                read(socketID , buffer , MAX_MESSAGE_LENGTH);
 
-		string buff = buffer;
-		int bufferSize = buff.length();
-		if(bufferSize <= lineLength) {
-			int i;
-			for(i = linesUsed ; i > 0 ; i--) {
-				lines[i] = lines[i - 1];
-			}
-			//bzero(lines[0] , MAX_MESSAGE_LENGTH);
-			lines[0] = buff;
-			if(linesUsed < linesToRemember) {
-				linesUsed++;
-			}
+                string buff = buffer;
+                int bufferSize = buff.length();
+                if(bufferSize <= lineLength) {
+                        int i;
+                        for(i = linesUsed ; i > 0 ; i--) {
+                                lines[i] = lines[i - 1];
+                        }
+                        
+                        lines[0] = buffer;
+                        if(linesUsed < linesToRemember) {
+                                linesUsed++;
+                        }
 
-		} else if(bufferSize > lineLength) {
-			int linesToAdd = (bufferSize / lineLength) + 1;
-			int i;
-			int c;
-			for(c = 0 ; c < linesToAdd ; c++) {
-				for(i = linesUsed ; i > 0 ; i--) {
-					//bzero(lines[i] , MAX_MESSAGE_LENGTH);
-					lines[i] = lines[i - 1];
-				}
-				if(linesUsed < linesToRemember) {
-					linesUsed++;
-				}
-				//bzero(lines[0] , MAX_MESSAGE_LENGTH);
-				lines[0] = (buff.substr(c * lineLength , lineLength)).c_str();
+                } else if(bufferSize > lineLength) {
+                        int linesToAdd = (bufferSize / lineLength) + 1;
+                        int i;
+                        int c;
+                        for(c = 0 ; c < linesToAdd ; c++) {
+                                for(i = linesUsed ; i > 0 ; i--) {
+                                        //bzero(lines[i] , MAX_MESSAGE_LENGTH);
+                                        lines[i] = lines[i - 1];
+                                }
+                                if(linesUsed < linesToRemember) {
+                                        linesUsed++;
+                                }
+                                //bzero(lines[0] , MAX_MESSAGE_LENGTH);
+                                lines[0] = (buff.substr(c * lineLength , lineLength)).c_str();
 
-			}
+                        }
 
-		}
+                }
 
-		//DRAW TO NCURSES
-		int i;
-		for(i = 0 ; i < linesUsed ; i++) {
-			mvprintw(LINES - (i + 6) , 2 , "%s" , lines[i].c_str());
-		}
-		move(LINES - 4 , 2);
+                //DRAW TO NCURSES
+                int i;
+                for(i = 0 ; i < linesUsed ; i++) {
+                        mvprintw(LINES - (i + 6) , 2 , "%s" , lines[i].c_str());
+                }
+                move(LINES - 4 , 2);
 
-		refresh();
-	}
+                refresh();
+        }
 }
