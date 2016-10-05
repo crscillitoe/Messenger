@@ -147,7 +147,7 @@ int main(int argc, char* argv[])
                         mvprintw(LINES - 4 , i , " ");
                 }
 
-                mvprintw(10, 5, "Suze of User Input: %d\n", strlen(userinput));
+                //mvprintw(10, 5, "Suze of User Input: %d\n", strlen(userinput));
 
                 if(strcmp(userinput, "EXIT\n") == 0)
                 {
