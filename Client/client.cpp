@@ -26,7 +26,7 @@ void* readThread(void* val);
 
 pthread_mutex_t lock;
 
-string temp;
+//string temp;
 int counter = 0;
 
 int main(int argc, char* argv[])
@@ -214,8 +214,7 @@ void* readThread(void* val) {
                 string message = recv["message"];
 
                 string buff = username + ": " + message;
-          //      printf("Buff: %s\n", buff.c_str());
-                mvprintw(5, 5, "Buff: %s\n", buff.c_str());
+  //              mvprintw(5, 5, "Buff: %s\n", buff.c_str());
  
 
                 int bufferSize = buff.length();
