@@ -26,8 +26,6 @@ void* readThread(void* val);
 
 pthread_mutex_t lock;
 
-//string temp;
-int counter = 0;
 
 int main(int argc, char* argv[])
 {
