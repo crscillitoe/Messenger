@@ -1,8 +1,10 @@
-CC=gcc
+#Test
+
+CC=g++
 CFLAGS=-c -Wall
-LDFLAGS=
-SOURCES=client.c
-OBJECTS=$(SOURCES:.c=.o)
+LDFLAGS= -pthread -lncurses
+SOURCES=client.cpp json.hpp
+OBJECTS=$(SOURCES:.cpp=.o)
 EXECUTABLE=client
 
 all: $(SOURCES) $(EXECUTABLE) cleanup
@@ -10,7 +12,7 @@ all: $(SOURCES) $(EXECUTABLE) cleanup
 $(EXECUTABLE): $(OBJECTS) 
 		$(CC) $(LDFLAGS) $(OBJECTS) -o $@
 
-.c.o:
+.cpp.o:
 		$(CC) $(CFLAGS) $< -o $@
 
 cleanup:

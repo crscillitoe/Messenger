@@ -17,8 +17,10 @@
 #include <string>
 #include <ncurses.h>
 #include <vector>
+#include "json.hpp"
 
 using namespace std;
+using json = nlohmann::json;
 
 void* readThread(void* val);
 
@@ -60,8 +62,6 @@ int main(int argc, char* argv[])
                 serverPort = 8371;
         }
 
-        //       strncpy(username, argv[2], 12);
-        //       strncpy(url, argv[1], 16);
         username = argv[2];
         url = argv[1];
 
@@ -114,9 +114,10 @@ int main(int argc, char* argv[])
 
         pthread_t thread;
         pthread_create(&thread , NULL , readThread , (void*) &serverSocket);
-
+        int seqnum = 0;
         while(!ex)
         {
+
                 int i;
                 for(i = 1 ; i < COLS ; i++) {
                         mvprintw(1 , i , "-");
@@ -147,25 +148,35 @@ int main(int argc, char* argv[])
                         mvprintw(LINES - 4 , i , " ");
                 }
 
-                //mvprintw(10, 5, "Suze of User Input: %d\n", strlen(userinput));
 
                 if(strcmp(userinput, "EXIT\n") == 0)
                 {
-                        (write(serverSocket, "EXIT", strlen("EXIT")) < 0);
+                        (write(serverSocket, "EXIT\n", strlen("EXIT\n")) < 0);
                         ex = 1;
                 }
 
+                json wrap;
+                wrap["username"] = username;
+                wrap["message"] = userinput;
+                wrap["seqnum"] = seqnum;
+
+                string toSendcpp = wrap.dump();
+                const char* toSend = toSendcpp.c_str();
+
+               // printf("TO SEND: %s\n", toSend);
                 message_to_send[0] = '\0';   // ensures the memory is an empty string
                 strcat(message_to_send, username);
                 strcat(message_to_send, ": ");
                 strcat(message_to_send, userinput);
                 // printf("%s", message_to_send);
                 // Write request to server socket
-                if(write(serverSocket, message_to_send, strlen(message_to_send)) < 0)
+                if(write(serverSocket, toSend, strlen(toSend)) < 0)
                 {
                         fprintf(stderr, "Write returned an error: %s\n", strerror(errno));
                         exit(1);
                 }
+
+                seqnum = !seqnum; 
         }
 
         endwin();
@@ -192,11 +203,21 @@ void* readThread(void* val) {
         const int lineLength = (COLS - 22);
         int linesUsed = 0;
 
+        json recv;
         while(1) {
                 bzero(buffer , MAX_MESSAGE_LENGTH);
                 read(socketID , buffer , MAX_MESSAGE_LENGTH);
 
-                string buff = buffer;
+                auto recv = json::parse(buffer);
+
+                string username = recv["username"];
+                string message = recv["message"];
+
+                string buff = username + ": " + message;
+          //      printf("Buff: %s\n", buff.c_str());
+                mvprintw(5, 5, "Buff: %s\n", buff.c_str());
+ 
+
                 int bufferSize = buff.length();
                 if(bufferSize <= lineLength) {
                         int i;
@@ -204,7 +225,7 @@ void* readThread(void* val) {
                                 lines[i] = lines[i - 1];
                         }
                         
-                        lines[0] = buffer;
+                        lines[0] = buff.c_str();
                         if(linesUsed < linesToRemember) {
                                 linesUsed++;
                         }
