@@ -22,6 +22,7 @@ int totalConnectedClients = 0;
 int socketDescriptors[MAX_CONNECTIONS];
 
 string pastVal;
+string globalUsername;
 int seqnumGlobal;
 string toSend;
 json jtoSend;
@@ -29,9 +30,9 @@ void* updateClients(void* val);
 void* clientThread(void* val);
 int main(int argc, const char *argv[]) {
 
-        jtoSend["username"] = NULL;
-        jtoSend["seqnum"] = 0;
-        jtoSend["message"] = NULL;
+        jtoSend["username"] = " ";
+        jtoSend["seqnum"] = 1;
+        jtoSend["message"] = " ";
         seqnumGlobal = 0;
         short PORT;
         int socketDescriptor;
@@ -121,14 +122,16 @@ void* updateClients(void* val) {
                 pthread_mutex_lock(&lock);
 
                 toSend = jtoSend.dump();
-                
 
-                if(seqnumGlobal != jtoSend["seqnum"]) { //If the messages are different
+
+                if(seqnumGlobal != jtoSend["seqnum"] || (jtoSend["username"] != globalUsername))
+                { //If the messages are different
                         int i;
                         printf("UPDATECLIENTS TOSEND: %s\n" , toSend.c_str());
                         for(i = 0 ; i < totalConnectedClients ; i++) {
                                 write(socketDescriptors[i] , toSend.c_str(), toSend.length());
                         }
+                        globalUsername = jtoSend["username"];
                         pastVal = toSend;
                         seqnumGlobal = jtoSend["seqnum"];
                 }
@@ -157,7 +160,7 @@ void* clientThread(void* val) {
 
         while(running) {
                 bzero(bufferRead, MAX_MESSAGE_SIZE);
-                
+
                 read(SOCKET_ID , bufferRead, MAX_MESSAGE_SIZE);
                 printf("Buffer Read : %s\n", bufferRead);
                 if(!strcmp("EXIT\n", bufferRead))
@@ -173,8 +176,8 @@ void* clientThread(void* val) {
                                 seqnum = wrap["seqnum"];
                         }
                         username = wrap["username"];
-                          buffer = wrap["message"];
-                        
+                        buffer = wrap["message"];
+
                         const char* pr_temp = buffer.c_str();
                         printf("BUFFER : %s\n" , pr_temp);
                         string bufferCPPString = buffer;
