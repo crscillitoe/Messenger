@@ -12,7 +12,9 @@
 #include <netdb.h>
 #include <pthread.h>
 #include <string>
+#include "json.hpp"
 using namespace std;
+using json = nlohmann::json;
 
 const int MAX_CONNECTIONS = 50;
 pthread_mutex_t lock;
@@ -20,11 +22,17 @@ int totalConnectedClients = 0;
 int socketDescriptors[MAX_CONNECTIONS];
 
 string pastVal;
+int seqnumGlobal;
 string toSend;
+json jtoSend;
 void* updateClients(void* val);
 void* clientThread(void* val);
 int main(int argc, const char *argv[]) {
 
+        jtoSend["username"] = NULL;
+        jtoSend["seqnum"] = 0;
+        jtoSend["message"] = NULL;
+        seqnumGlobal = 0;
         short PORT;
         int socketDescriptor;
 
@@ -37,13 +45,13 @@ int main(int argc, const char *argv[]) {
         if(argc != 2 && argc != 1) {
                 printf("INVALID SYNTAX\n");
                 printf("Valid syntax : %s PORT\n" , argv[0]);
-		printf("OR : %s\n" , argv[0]);
+                printf("OR : %s\n" , argv[0]);
                 return -1; //Indicate FAILURE.
         }
 
-	if(argc == 1) {
-		argv[1] = "8371";
-	}
+        if(argc == 1) {
+                argv[1] = "8371";
+        }
 
         //Initialize the mutex variable, lock.
         if(pthread_mutex_init(&lock , NULL) != 0) {
@@ -84,17 +92,17 @@ int main(int argc, const char *argv[]) {
                 return -1; //Indicate FAILURE.
         }
 
-       while(1) {
-		pthread_t temp;
+        while(1) {
+                pthread_t temp;
                 clientLength = sizeof(clientAddress);
                 if((clientSocket = accept(socketDescriptor , (struct sockaddr *) &clientAddress, &clientLength)) < 0) {
                         printf("Accept() failed");
                         return -1; //Indicate FAILURE.
                 }
-		if(pthread_create(&temp , NULL , clientThread , (void*)(&clientSocket)) != 0) {
-			printf("Pthread creation error!\n");
-			return -1; //Indicate FAILURE.
-		}
+                if(pthread_create(&temp , NULL , clientThread , (void*)(&clientSocket)) != 0) {
+                        printf("Pthread creation error!\n");
+                        return -1; //Indicate FAILURE.
+                }
         }
 
         if(pthread_join(serverThread , NULL)) {
@@ -105,67 +113,95 @@ int main(int argc, const char *argv[]) {
 }
 
 void* updateClients(void* val) {
-	printf("updateClients has started!\n");
-	printf("Current value of pastVal : %s\n" , pastVal.c_str());
+        printf("updateClients has started!\n");
+        printf("Current value of pastVal : %s\n" , pastVal.c_str());
         while(1) {
 
-		usleep(5000);
-		pthread_mutex_lock(&lock);
+                usleep(5000);
+                pthread_mutex_lock(&lock);
 
-                if(toSend != pastVal) { //If the messages are different
+                toSend = jtoSend.dump();
+                
+
+                if(seqnumGlobal != jtoSend["seqnum"]) { //If the messages are different
                         int i;
-			printf("UPDATECLIENTS TOSEND: %s\n" , toSend.c_str());
+                        printf("UPDATECLIENTS TOSEND: %s\n" , toSend.c_str());
                         for(i = 0 ; i < totalConnectedClients ; i++) {
-                                write(socketDescriptors[i] , toSend.c_str() , toSend.length());
+                                write(socketDescriptors[i] , toSend.c_str(), toSend.length());
                         }
                         pastVal = toSend;
+                        seqnumGlobal = jtoSend["seqnum"];
                 }
-		pthread_mutex_unlock(&lock);
+                pthread_mutex_unlock(&lock);
         }
 }
 
 void* clientThread(void* val) {
-	int MAX_MESSAGE_SIZE = 2048;
-        char buffer[MAX_MESSAGE_SIZE];
+        int MAX_MESSAGE_SIZE = 2048;
+        char bufferRead[MAX_MESSAGE_SIZE];
 
-	int SOCKET_ID = *((int*)val);
-	printf("Child with Socket ID %d has connected!\n" , SOCKET_ID);
-        bzero(buffer , MAX_MESSAGE_SIZE);
+        json wrap;
+        int seqnum;
+        string username;
+        string buffer;
+
+        int SOCKET_ID = *((int*)val);
+        printf("Child with Socket ID %d has connected!\n" , SOCKET_ID);
+        //        bzero(buffer , MAX_MESSAGE_SIZE);
         int running = 1;
 
+        pthread_mutex_lock(&lock);
+        socketDescriptors[totalConnectedClients] = SOCKET_ID;
+        totalConnectedClients++;
+        pthread_mutex_unlock(&lock);
+
+        while(running) {
+                bzero(bufferRead, MAX_MESSAGE_SIZE);
+                
+                read(SOCKET_ID , bufferRead, MAX_MESSAGE_SIZE);
+                printf("Buffer Read : %s\n", bufferRead);
+                if(!strcmp("EXIT\n", bufferRead))
+                {
+                        running = 0;
+                }
+                else
+                {
+                        auto wrap = json::parse(bufferRead);
+
+                        if(wrap["seqnum"] != seqnum)
+                        {
+                                seqnum = wrap["seqnum"];
+                        }
+                        username = wrap["username"];
+                          buffer = wrap["message"];
+                        
+                        const char* pr_temp = buffer.c_str();
+                        printf("BUFFER : %s\n" , pr_temp);
+                        string bufferCPPString = buffer;
                         pthread_mutex_lock(&lock);
-                                socketDescriptors[totalConnectedClients] = SOCKET_ID;
-                                totalConnectedClients++;
+                        toSend = bufferCPPString;
+                        jtoSend["username"] = username;
+                        jtoSend["message"] = bufferCPPString;
+                        jtoSend["seqnum"] = seqnum;
+                        //      printf("toSend : %s\n" , toSend);
+                        printf("pastusing json = nlohmann::json;Val : %s\n" , pastVal.c_str());
                         pthread_mutex_unlock(&lock);
-
-                        while(running) {
-				bzero(buffer , MAX_MESSAGE_SIZE);
-                                read(SOCKET_ID , buffer , MAX_MESSAGE_SIZE);
-                                printf("BUFFER : %s\n" , buffer);
-                                string bufferCPPString = buffer;
-                                pthread_mutex_lock(&lock);
-                                        toSend = bufferCPPString;
-                                        printf("toSend : %s\n" , toSend.c_str());
-                                        printf("pastVal : %s\n" , pastVal.c_str());
-                                pthread_mutex_unlock(&lock);
-                                if(bufferCPPString == "EXIT") {
-                                        running = 0;
-                                }
-                        }
-
-	pthread_mutex_lock(&lock);
-                totalConnectedClients--;
-                int i;
-                int location = 5000;
-                for(i = 0 ; i < MAX_CONNECTIONS - 1 ; i++) {
-                        if(socketDescriptors[i] = SOCKET_ID) {
-                                location = i;
-                                break;
-                        }
                 }
-                for(i = location ; i < MAX_CONNECTIONS ; i++) {
-                        socketDescriptors[i] = socketDescriptors[i + 1];
+        }
+
+        pthread_mutex_lock(&lock);
+        totalConnectedClients--;
+        int i;
+        int location = 5000;
+        for(i = 0 ; i < MAX_CONNECTIONS - 1 ; i++) {
+                if(socketDescriptors[i] = SOCKET_ID) {
+                        location = i;
+                        break;
                 }
+        }
+        for(i = location ; i < MAX_CONNECTIONS ; i++) {
+                socketDescriptors[i] = socketDescriptors[i + 1];
+        }
         pthread_mutex_unlock(&lock);
 
         printf("Child with Socket ID %d has disconnected!\n" , SOCKET_ID);
