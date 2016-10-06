@@ -21,10 +21,6 @@ pthread_mutex_t lock;
 int totalConnectedClients = 0;
 int socketDescriptors[MAX_CONNECTIONS];
 
-string pastVal;
-string globalUsername;
-int seqnumGlobal;
-string toSend;
 json jtoSend;
 void* updateClients(void* val);
 void* clientThread(void* val);
@@ -33,7 +29,6 @@ int main(int argc, const char *argv[]) {
         jtoSend["username"] = " ";
         jtoSend["seqnum"] = 1;
         jtoSend["message"] = " ";
-        seqnumGlobal = 0;
         short PORT;
         int socketDescriptor;
 
@@ -115,7 +110,10 @@ int main(int argc, const char *argv[]) {
 
 void* updateClients(void* val) {
         printf("updateClients has started!\n");
-        printf("Current value of pastVal : %s\n" , pastVal.c_str());
+        string currentUser;
+        int currentSeqNum = 0;
+
+        string toSend;
         while(1) {
 
                 usleep(5000);
@@ -124,16 +122,15 @@ void* updateClients(void* val) {
                 toSend = jtoSend.dump();
 
 
-                if(seqnumGlobal != jtoSend["seqnum"] || (jtoSend["username"] != globalUsername))
+                if(currentSeqNum != jtoSend["seqnum"] || (jtoSend["username"] != currentUser))
                 { //If the messages are different
                         int i;
                         printf("UPDATECLIENTS TOSEND: %s\n" , toSend.c_str());
                         for(i = 0 ; i < totalConnectedClients ; i++) {
                                 write(socketDescriptors[i] , toSend.c_str(), toSend.length());
                         }
-                        globalUsername = jtoSend["username"];
-                        pastVal = toSend;
-                        seqnumGlobal = jtoSend["seqnum"];
+                        currentUser = jtoSend["username"];
+                        currentSeqNum = jtoSend["seqnum"];
                 }
                 pthread_mutex_unlock(&lock);
         }
@@ -182,12 +179,9 @@ void* clientThread(void* val) {
                         printf("BUFFER : %s\n" , pr_temp);
                         string bufferCPPString = buffer;
                         pthread_mutex_lock(&lock);
-                        toSend = bufferCPPString;
                         jtoSend["username"] = username;
                         jtoSend["message"] = bufferCPPString;
                         jtoSend["seqnum"] = seqnum;
-                        //      printf("toSend : %s\n" , toSend);
-                        printf("pastusing json = nlohmann::json;Val : %s\n" , pastVal.c_str());
                         pthread_mutex_unlock(&lock);
                 }
         }
