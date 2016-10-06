@@ -127,7 +127,7 @@ int main(int argc, char* argv[])
                 for(i = 2 ; i < LINES ; i++) {
                         if(i != LINES-5 && i != LINES-4 && i != LINES-3) {
                                 mvprintw(i , 1 , "|");
-                                mvprintw(i , COLS , "|");
+                                mvprintw(i , COLS - 1, "|");
                                 mvprintw(i , COLS - 20 , "|");
                         }
                 }
@@ -233,6 +233,19 @@ void* readThread(void* val) {
                 for(i = 0 ; i < linesUsed ; i++) {
                         mvprintw(LINES - (i + 6) , 2 , "%s" , lines[i].c_str());
                 }
+
+
+                for(i = 2 ; i < LINES ; i++) {
+                        if(i != LINES-5 && i != LINES-4 && i != LINES-3) {
+                                mvprintw(i , COLS - 1, "|");
+                                mvprintw(i , COLS - 20 , "|");
+                        }
+                }
+
+                mvprintw(2 , COLS - 18 , "CONNECTED USERS");
+                mvprintw(3 , COLS - 20 , "--------------------");
+
+
                 move(LINES - 4 , 2);
 
                 refresh();
