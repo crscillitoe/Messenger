@@ -31,7 +31,7 @@ typedef struct ll {
 
 // Function Prototypes
 
-int push(stringll* head, string newUser);
+int push(stringll** head, string newUser);
 void  allocateArray(char** arr, int num_elements, int sizeof_elements);
 void* updateClients(void* val);
 void* clientThread(void* val);

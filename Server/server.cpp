@@ -142,7 +142,7 @@ void* clientThread(void* val) {
 				seqnum = wrap["seqnum"];
 			}
 			username = wrap["username"];
-			push(head, username);
+			push(&head, username);
 			buffer = wrap["message"];
 
 			const char* pr_temp = buffer.c_str();
@@ -151,7 +151,7 @@ void* clientThread(void* val) {
 
 			pthread_mutex_lock(&lock);
 			jtoSend["username"] = username;
-			jtoSend["users"] = head->next->user;
+			jtoSend["users"] = head->user;
 			jtoSend["message"] = bufferCPPString;
 			jtoSend["seqnum"] = seqnum;
 			pthread_mutex_unlock(&lock);

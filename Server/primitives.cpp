@@ -42,10 +42,10 @@ void  allocateArray(char** arr, int num_elements, int sizeof_elements){
 
 }
 
-int push(stringll* head, string newUser){
-	stringll* current = head;
+int push(stringll** head, string newUser){
+	stringll* current = *head;
 	//Check that newUser isn't already in the linked list
-	if(head->user == newUser){
+	if((*head)->user == newUser){
 		printf("User already exists");
 		return -1;
 	}
@@ -60,10 +60,10 @@ int push(stringll* head, string newUser){
 	//Push newUser
 	stringll* newNode = (stringll*) malloc (sizeof(stringll));
 	newNode->user = newUser;
-	newNode->next = NULL;
-	head->next = newNode;
-
+	newNode->next = *head;
+	*head = newNode;
 	return 0;
+
 }
 
 void validateInput(int argc, const char* argv[]){
