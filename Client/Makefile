@@ -3,7 +3,7 @@
 CC=g++
 CFLAGS=-c -Wall
 LDFLAGS= -pthread -lncurses
-SOURCES=client.cpp json.hpp
+SOURCES=client.cpp json.hpp client.hpp primitives.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
 EXECUTABLE=client
 
