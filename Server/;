@@ -1,0 +1,10 @@
+#ifndef SERVER
+#define SERVER
+
+void* updateClients(void* val);
+void* clientThread(void* val);
+void initJson();
+
+void validateInput(int argc, char* argv[]);
+
+#endif
