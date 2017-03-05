@@ -32,6 +32,39 @@ int initConnection(int* sd, short PORT){
 	return socketDescriptor;
 }
 
+void  allocateArray(char** arr, int num_elements, int sizeof_elements){
+	int i;
+	arr = (char**) calloc (num_elements, sizeof(char*));
+
+	for(i = 0; i<MAX_CONNECTIONS; i++){
+		arr[i] = (char*) malloc (sizeof_elements * sizeof(char));
+	}
+
+}
+
+int push(stringll* head, string newUser){
+	stringll* current = head;
+	//Check that newUser isn't already in the linked list
+	if(head->user == newUser){
+		printf("User already exists");
+		return -1;
+	}
+
+	while(current->next != NULL){
+		if(current->next->user == newUser){
+			return -1;
+		}
+		current = current->next;
+	}
+
+	//Push newUser
+	stringll* newNode = (stringll*) malloc (sizeof(stringll));
+	newNode->user = newUser;
+	newNode->next = NULL;
+	head->next = newNode;
+
+	return 0;
+}
 
 void validateInput(int argc, const char* argv[]){
 	if(argc != 2 && argc != 1) {

@@ -1,11 +1,11 @@
 #Test
 
 CC=g++
-CFLAGS=-c -Wall
+CFLAGS=-g -c -Wall
 LDFLAGS= -pthread -lncurses
 SOURCES=server.cpp server.hpp primitives.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
-EXECUTABLE=client
+EXECUTABLE=server
 
 all: $(SOURCES) $(EXECUTABLE) cleanup
     

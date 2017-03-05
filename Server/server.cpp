@@ -1,17 +1,20 @@
 #include "server.hpp"
 #include "json.hpp"
-using namespace std;
+//using namespace std;
 using json = nlohmann::json;
 
-const int MAX_CONNECTIONS = 50;
+
 pthread_mutex_t lock;
 int totalConnectedClients = 0;
 int socketDescriptors[MAX_CONNECTIONS];
-
 json jtoSend;
+stringll *head = (stringll*) malloc (sizeof(stringll));
 int main(int argc, const char *argv[]) {
 
 	initJson();
+
+
+
 	short PORT;
 	int socketDescriptor;
 
@@ -19,7 +22,6 @@ int main(int argc, const char *argv[]) {
 	unsigned int clientLength;
 	int clientSocket;
 
-	struct sockaddr_in serverAddress;
 
 	validateInput(argc, argv);
 
@@ -95,10 +97,13 @@ void* updateClients(void* val) {
 	}
 }
 
+
+
 void initJson(){
 	jtoSend["username"] = " ";
 	jtoSend["seqnum"] = 1;
 	jtoSend["message"] = " ";
+	jtoSend["users"] = " ";
 }
 
 void* clientThread(void* val) {
@@ -112,7 +117,6 @@ void* clientThread(void* val) {
 
 	int SOCKET_ID = *((int*)val);
 	printf("Child with Socket ID %d has connected!\n" , SOCKET_ID);
-	//        bzero(buffer , MAX_MESSAGE_SIZE);
 	int running = 1;
 
 	pthread_mutex_lock(&lock);
@@ -138,13 +142,16 @@ void* clientThread(void* val) {
 				seqnum = wrap["seqnum"];
 			}
 			username = wrap["username"];
+			push(head, username);
 			buffer = wrap["message"];
 
 			const char* pr_temp = buffer.c_str();
 			printf("BUFFER : %s\n" , pr_temp);
 			string bufferCPPString = buffer;
+
 			pthread_mutex_lock(&lock);
 			jtoSend["username"] = username;
+			jtoSend["users"] = head->next->user;
 			jtoSend["message"] = bufferCPPString;
 			jtoSend["seqnum"] = seqnum;
 			pthread_mutex_unlock(&lock);

@@ -192,6 +192,7 @@ void printn(const char* message) {
 void cleanUpAndExit(int){
 
 	(write(serverSocket, "EXIT\n", strlen("EXIT\n")) < 0);
+	fflush(stdout);
 	exit(0);
 
 }
@@ -220,6 +221,7 @@ void* readThread(void* val) {
 
 		string username = recv["username"];
 		string message = recv["message"];
+		string connectedUser = recv["users"];
 
 		string buff = username + ": " + message;
 		//              mvprintw(5, 5, "Buff: %s\n", buff.c_str());
@@ -272,6 +274,7 @@ void* readThread(void* val) {
 
 		mvprintw(2 , COLS - 18 , "CONNECTED USERS");
 		mvprintw(3 , COLS - 20 , "--------------------");
+		mvprintw(4 , COLS - 18 ,  connectedUser.c_str());
 
 
 		move(LINES - 4 , 2);
