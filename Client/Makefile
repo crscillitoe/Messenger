@@ -1,8 +1,8 @@
 #Test
 
 CC=g++
-CFLAGS=-c -Wall
-LDFLAGS= -pthread -lncurses
+CFLAGS=-c -Wall -std=c++11 
+LDFLAGS= -pthread -std=c++11 
 SOURCES=client.cpp json.hpp client.hpp primitives.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
 EXECUTABLE=client
@@ -10,7 +10,7 @@ EXECUTABLE=client
 all: $(SOURCES) $(EXECUTABLE) cleanup
     
 $(EXECUTABLE): $(OBJECTS) 
-		$(CC) $(LDFLAGS) $(OBJECTS) -o $@
+		$(CC) $(LDFLAGS) $(OBJECTS) -o $@ -lncurses
 
 .cpp.o:
 		$(CC) $(CFLAGS) $< -o $@
