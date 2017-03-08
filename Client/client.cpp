@@ -85,7 +85,7 @@ void* readThread(void* val) {
 
 		string username = recv["username"];
 		string message = recv["message"];
-		string connectedUser = recv["users"];
+		std::vector<string> connectedUser = recv["users"];
 
 		string buff = username + ": " + message;
 		//              mvprintw(5, 5, "Buff: %s\n", buff.c_str());
@@ -129,7 +129,12 @@ void* readThread(void* val) {
 		}
 
 		drawLines();
-		mvprintw(4 , COLS - 18 ,  connectedUser.c_str());
+		std::vector<string>::iterator itr;
+		int j = 0;
+		for ( itr = connectedUser.begin(); itr != connectedUser.end(); ++itr ) {
+			mvprintw(j+4 , COLS - 18 ,  connectedUser[j].c_str());
+			j++;
+		}
 
 
 		move(LINES - 4 , 2);

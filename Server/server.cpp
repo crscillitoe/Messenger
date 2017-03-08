@@ -1,6 +1,5 @@
 #include "server.hpp"
 #include "json.hpp"
-//using namespace std;
 using json = nlohmann::json;
 
 
@@ -8,7 +7,7 @@ pthread_mutex_t lock;
 int totalConnectedClients = 0;
 int socketDescriptors[MAX_CONNECTIONS];
 json jtoSend;
-stringll *head = (stringll*) malloc (sizeof(stringll));
+vector<string> connectedUsers;
 int main(int argc, const char *argv[]) {
 
 	initJson();
@@ -142,7 +141,7 @@ void* clientThread(void* val) {
 				seqnum = wrap["seqnum"];
 			}
 			username = wrap["username"];
-			push(&head, username);
+			pushUnique(&connectedUsers, username);
 			buffer = wrap["message"];
 
 			const char* pr_temp = buffer.c_str();
@@ -151,7 +150,7 @@ void* clientThread(void* val) {
 
 			pthread_mutex_lock(&lock);
 			jtoSend["username"] = username;
-			jtoSend["users"] = head->user;
+			jtoSend["users"] = connectedUsers;
 			jtoSend["message"] = bufferCPPString;
 			jtoSend["seqnum"] = seqnum;
 			pthread_mutex_unlock(&lock);

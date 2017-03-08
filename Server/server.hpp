@@ -15,23 +15,15 @@
 #include <netdb.h>
 #include <pthread.h>
 #include <string>
-
+#include <vector>
 using namespace std;
 // Globals
 const int MAXUSERNAMESIZE = 16;
 const int MAX_CONNECTIONS = 50;
 
-//Structs
-typedef struct ll {
-	string user;
-	struct ll* next;
-} stringll;
-	
-
-
 // Function Prototypes
 
-int push(stringll** head, string newUser);
+int pushUnique(vector<string> *vec, string toAdd);
 void  allocateArray(char** arr, int num_elements, int sizeof_elements);
 void* updateClients(void* val);
 void* clientThread(void* val);

@@ -4,6 +4,16 @@
 using namespace std;
 
 
+int pushUnique(vector<string> *vec, string toAdd){
+	std::vector<string>::iterator itr;
+	for(itr = (*vec).begin(); itr != (*vec).end(); ++itr) {
+		if(*itr == toAdd){
+			return -1;
+		}
+	}
+	(*vec).push_back(toAdd);
+	return 0;
+}
 int initConnection(int* sd, short PORT){
 	int socketDescriptor = *sd;
 
@@ -42,29 +52,6 @@ void  allocateArray(char** arr, int num_elements, int sizeof_elements){
 
 }
 
-int push(stringll** head, string newUser){
-	stringll* current = *head;
-	//Check that newUser isn't already in the linked list
-	if((*head)->user == newUser){
-		printf("User already exists");
-		return -1;
-	}
-
-	while(current->next != NULL){
-		if(current->next->user == newUser){
-			return -1;
-		}
-		current = current->next;
-	}
-
-	//Push newUser
-	stringll* newNode = (stringll*) malloc (sizeof(stringll));
-	newNode->user = newUser;
-	newNode->next = *head;
-	*head = newNode;
-	return 0;
-
-}
 
 void validateInput(int argc, const char* argv[]){
 	if(argc != 2 && argc != 1) {
