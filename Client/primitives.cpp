@@ -104,26 +104,13 @@ void inputLoop(int sSocket, char* username) {
 		if(strcmp(userinput, "EXIT\n") == 0)
 		{
 			cleanUpAndExit(0);
+			
+		//  exit(0);
 		}
 
-		json wrap;
-		wrap["username"] = username;
-		wrap["message"] = userinput;
-		wrap["seqnum"] = seqnum;
+		json wrap = makeJson(username, userinput, seqnum);
 
-		string toSendcpp = wrap.dump();
-		const char* toSend = toSendcpp.c_str();
-
-		// printf("TO SEND: %s\n", toSend);
-		message_to_send[0] = '\0';   // ensures the memory is an empty string
-		strcat(message_to_send, username);
-		strcat(message_to_send, ": ");
-		strcat(message_to_send, userinput);
-		// printf("%s", message_to_send);
-		// Write request to server socket
-		if(write(sSocket, toSend, strlen(toSend)) < 0)
-		{
-			fprintf(stderr, "Write returned an error: %s\n", strerror(errno));
+		if(sendJson(wrap, sSocket)){
 			exit(1);
 		}
 
@@ -133,3 +120,21 @@ void inputLoop(int sSocket, char* username) {
 
 }
 
+int sendJson(json j, int socket){	
+		string toSendcpp = j.dump();
+		const char* toSend = toSendcpp.c_str();
+		if(write(socket, toSend, strlen(toSend)) < 0)
+		{
+			fprintf(stderr, "Write returned an error: %s\n", strerror(errno));
+			return -1;
+		}
+		return 0;
+}
+
+json makeJson(string user, string message, int seqnum){
+	json wrap;
+	wrap["username"] = user;
+	wrap["message"] = message;
+	wrap["seqnum"] = seqnum;
+	return wrap;
+}

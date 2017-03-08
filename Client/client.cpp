@@ -55,8 +55,10 @@ int main(int argc, char* argv[])
 
 void cleanUpAndExit(int){ //int serverSocket){
 
-	(write(serverSocket, "EXIT\n", strlen("EXIT\n")) < 0);
-	fflush(stdout);
+	json wrap = makeJson("temp", "EXIT\n", 2);
+	if(sendJson(wrap, serverSocket)){
+		exit(1);
+	}
 	exit(0);
 
 }
@@ -68,11 +70,8 @@ void* readThread(void* val) {
 	char buffer[MAX_MESSAGE_LENGTH];
 
 	const int linesToRemember = (LINES - 7);
-
 	const int MAX_POSSIBLE_LINES_REMEMBER = 100;
-
 	string lines[MAX_POSSIBLE_LINES_REMEMBER];
-
 	const int lineLength = (COLS - 22);
 	int linesUsed = 0;
 

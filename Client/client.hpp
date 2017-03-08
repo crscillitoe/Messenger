@@ -27,6 +27,8 @@
 using namespace std;
 using json = nlohmann::json;
 
+int sendJson(json j, int socket);
+json makeJson(string user, string message, int seqnum);
 void* readThread(void* val);
 void cleanUpAndExit(int);
 void printn(const char* message);

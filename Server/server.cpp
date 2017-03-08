@@ -128,20 +128,20 @@ void* clientThread(void* val) {
 
 		read(SOCKET_ID , bufferRead, MAX_MESSAGE_SIZE);
 		printf("Buffer Read : %s\n", bufferRead);
-		if(!strcmp("EXIT\n", bufferRead))
-		{
-			running = 0;
-		}
-		else
-		{
-			auto wrap = json::parse(bufferRead);
+		auto wrap = json::parse(bufferRead);
 
-			if(wrap["seqnum"] != seqnum)
-			{
-				seqnum = wrap["seqnum"];
-			}
-			username = wrap["username"];
-			buffer = wrap["message"];
+		if(wrap["seqnum"] != seqnum)
+		{
+			seqnum = wrap["seqnum"];
+		}
+		username = wrap["username"];
+		buffer = wrap["message"];
+
+		if(buffer == "EXIT\n"){
+			running = 0;
+			//pop username
+		} else {
+
 			pushUnique(&connectedUsers, username);
 
 			pthread_mutex_lock(&lock);
