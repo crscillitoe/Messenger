@@ -129,8 +129,8 @@ void* readThread(void* val) {
 		}
 
 		drawLines();
-		std::vector<string>::iterator itr;
 		int j = 0;
+		std::vector<string>::iterator itr;
 		for ( itr = connectedUser.begin(); itr != connectedUser.end(); ++itr ) {
 			mvprintw(j+4 , COLS - 18 ,  connectedUser[j].c_str());
 			j++;

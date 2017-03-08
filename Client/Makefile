@@ -1,7 +1,7 @@
 #Test
 
 CC=g++
-CFLAGS=-c -Wall -std=c++11 
+CFLAGS=-c -Wall -Wextra -std=c++11 
 LDFLAGS= -pthread -std=c++11 
 SOURCES=client.cpp json.hpp client.hpp primitives.cpp
 OBJECTS=$(SOURCES:.cpp=.o)

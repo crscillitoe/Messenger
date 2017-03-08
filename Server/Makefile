@@ -1,7 +1,7 @@
 #Test
 
 CC=g++
-CFLAGS=-g -c -Wall
+CFLAGS=-g -c -Wall -Wextra
 LDFLAGS= -pthread -lncurses
 SOURCES=server.cpp server.hpp primitives.cpp
 OBJECTS=$(SOURCES:.cpp=.o)

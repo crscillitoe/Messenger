@@ -68,7 +68,7 @@ int main(int argc, const char *argv[]) {
 
 }
 
-void* updateClients(void* val) {
+void* updateClients(void*) {
 	printf("updateClients has started!\n");
 	string currentUser;
 	int currentSeqNum = 0;
@@ -141,17 +141,13 @@ void* clientThread(void* val) {
 				seqnum = wrap["seqnum"];
 			}
 			username = wrap["username"];
-			pushUnique(&connectedUsers, username);
 			buffer = wrap["message"];
-
-			const char* pr_temp = buffer.c_str();
-			printf("BUFFER : %s\n" , pr_temp);
-			string bufferCPPString = buffer;
+			pushUnique(&connectedUsers, username);
 
 			pthread_mutex_lock(&lock);
 			jtoSend["username"] = username;
 			jtoSend["users"] = connectedUsers;
-			jtoSend["message"] = bufferCPPString;
+			jtoSend["message"] = buffer; //CPPString;
 			jtoSend["seqnum"] = seqnum;
 			pthread_mutex_unlock(&lock);
 		}
@@ -177,5 +173,5 @@ void* clientThread(void* val) {
 	shutdown(SOCKET_ID , SHUT_RDWR);
 	close(SOCKET_ID);
 
-
+	return NULL;
 }
