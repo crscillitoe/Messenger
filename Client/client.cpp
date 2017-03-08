@@ -4,13 +4,13 @@ pthread_mutex_t lock;
 
 int serverSocket;
 
+char* myUsername; 
 int main(int argc, char* argv[])
 {
 
 
 	unsigned short serverPort;
 	char* str_port; 
-	char* username; 
 	char* url; 
 
 
@@ -34,7 +34,7 @@ int main(int argc, char* argv[])
 		serverPort = 8371;
 	}
 
-	username = argv[2];
+	myUsername = argv[2];
 	url = argv[1];
 
 	serverSocket = initConnection(serverPort, url, serverSocket);
@@ -46,7 +46,7 @@ int main(int argc, char* argv[])
 	pthread_t thread;
 	pthread_create(&thread , NULL , readThread , (void*) &serverSocket);
 
-	inputLoop(serverSocket, username);
+	inputLoop(serverSocket, myUsername);
 
 	endwin();
 
@@ -55,7 +55,7 @@ int main(int argc, char* argv[])
 
 void cleanUpAndExit(int){ //int serverSocket){
 
-	json wrap = makeJson("temp", "EXIT\n", 2);
+	json wrap = makeJson(myUsername, "EXIT\n", 2);
 	if(sendJson(wrap, serverSocket)){
 		exit(1);
 	}
