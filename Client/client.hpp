@@ -27,6 +27,7 @@
 using namespace std;
 using json = nlohmann::json;
 
+void printConnectedUsers(vector<string> *users);
 int sendJson(json j, int socket);
 json makeJson(string user, string message, int seqnum);
 void* readThread(void* val);
@@ -36,6 +37,7 @@ int initConnection(unsigned short serverPort, char* url, int serverSocket);
 void drawScreen();
 void drawLines();
 
+int writeLine(string buffer, int linesUsed, string lines[]);
 void inputLoop(int sSocket, char* username);
 
 #endif

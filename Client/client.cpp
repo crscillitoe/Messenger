@@ -65,79 +65,57 @@ void cleanUpAndExit(int){ //int serverSocket){
 
 void* readThread(void* val) {
 
+	//Variables
 	int socketID = *((int*)val);
 	const int MAX_MESSAGE_LENGTH = 2048;
 	char buffer[MAX_MESSAGE_LENGTH];
 
-	const int linesToRemember = (LINES - 7);
 	const int MAX_POSSIBLE_LINES_REMEMBER = 100;
 	string lines[MAX_POSSIBLE_LINES_REMEMBER];
 	const int lineLength = (COLS - 22);
 	int linesUsed = 0;
-
 	json recv;
+
 	while(1) {
 		bzero(buffer , MAX_MESSAGE_LENGTH);
 		read(socketID , buffer , MAX_MESSAGE_LENGTH);
 
 		auto recv = json::parse(buffer);
-
 		string username = recv["username"];
 		string message = recv["message"];
 		std::vector<string> connectedUser = recv["users"];
 
 		string buff = username + ": " + message;
-		//              mvprintw(5, 5, "Buff: %s\n", buff.c_str());
-
 
 		int bufferSize = buff.length();
 		if(bufferSize <= lineLength) {
-			int i;
-			for(i = linesUsed ; i > 0 ; i--) {
-				lines[i] = lines[i - 1];
-			}
-
-			lines[0] = buff.c_str();
-			if(linesUsed < linesToRemember) {
-				linesUsed++;
-			}
-
+			linesUsed = writeLine(buff, linesUsed, lines);
 		} else if(bufferSize > lineLength) {
 			int linesToAdd = (bufferSize / lineLength) + 1;
-			int i;
 			int c;
 			for(c = 0 ; c < linesToAdd ; c++) {
-				for(i = linesUsed ; i > 0 ; i--) {
-					//bzero(lines[i] , MAX_MESSAGE_LENGTH);
-					lines[i] = lines[i - 1];
-				}
-				if(linesUsed < linesToRemember) {
-					linesUsed++;
-				}
-				//bzero(lines[0] , MAX_MESSAGE_LENGTH);
-				lines[0] = (buff.substr(c * lineLength , lineLength)).c_str();
-
+				linesUsed = writeLine(buff.substr(c * lineLength , lineLength), linesUsed, lines);
 			}
 
 		}
-
+		
 		//DRAW TO NCURSES
 		int i;
 		for(i = 0 ; i < linesUsed ; i++) {
 			mvprintw(LINES - (i + 6) , 2 , "%s" , lines[i].c_str());
 		}
-
 		drawLines();
-		int j = 0;
-		std::vector<string>::iterator itr;
-		for ( itr = connectedUser.begin(); itr != connectedUser.end(); ++itr ) {
-			mvprintw(j+4 , COLS - 18 ,  connectedUser[j].c_str());
-			j++;
-		}
-
-
+		printConnectedUsers(&connectedUser);
 		move(LINES - 4 , 2);
-
 		refresh();
+	}
+}
+
+void printConnectedUsers(vector<string> *users) {
+	int j = 0;
+	std::vector<string>::iterator itr;
+	for ( itr = (*users).begin(); itr != (*users).end(); ++itr ) {
+		mvprintw(j+4 , COLS - 18 ,  (*users)[j].c_str());
+		j++;
 	}
 }

@@ -41,22 +41,40 @@ int initConnection(unsigned short serverPort, char* url, int serverSocket) {
 
 }
 
+int writeLine(string buffer, int linesUsed, string lines[]){
+	
+	const int linesToRemember = (LINES - 7);
+	int i;
+	for(i = linesUsed ; i > 0 ; i--) {
+		lines[i] = lines[i - 1];
+	}
+
+	lines[0] = buffer.c_str();
+	if(linesUsed < linesToRemember) {
+		linesUsed++;
+	}
+
+	return linesUsed;
+}
+
+
+
 void printn(const char* message) {
 	printf("%s\n" , message);
 }
 
 void drawScreen(){
 
-		int i;
-		for(i = 1 ; i < COLS ; i++) {
-			mvprintw(1 , i , "-");
-			mvprintw(LINES - 5 , i , "-");
-			mvprintw(LINES - 3 , i , "-");
-		}
+	int i;
+	for(i = 1 ; i < COLS ; i++) {
+		mvprintw(1 , i , "-");
+		mvprintw(LINES - 5 , i , "-");
+		mvprintw(LINES - 3 , i , "-");
+	}
 
-		drawLines();
+	drawLines();
 
-		mvprintw(LINES - 4 , 1 , ">");
+	mvprintw(LINES - 4 , 1 , ">");
 }
 
 void drawLines(){
@@ -104,8 +122,8 @@ void inputLoop(int sSocket, char* username) {
 		if(strcmp(userinput, "EXIT\n") == 0)
 		{
 			cleanUpAndExit(0);
-			
-		//  exit(0);
+
+			//  exit(0);
 		}
 
 		json wrap = makeJson(username, userinput, seqnum);
@@ -121,14 +139,14 @@ void inputLoop(int sSocket, char* username) {
 }
 
 int sendJson(json j, int socket){	
-		string toSendcpp = j.dump();
-		const char* toSend = toSendcpp.c_str();
-		if(write(socket, toSend, strlen(toSend)) < 0)
-		{
-			fprintf(stderr, "Write returned an error: %s\n", strerror(errno));
-			return -1;
-		}
-		return 0;
+	string toSendcpp = j.dump();
+	const char* toSend = toSendcpp.c_str();
+	if(write(socket, toSend, strlen(toSend)) < 0)
+	{
+		fprintf(stderr, "Write returned an error: %s\n", strerror(errno));
+		return -1;
+	}
+	return 0;
 }
 
 json makeJson(string user, string message, int seqnum){
