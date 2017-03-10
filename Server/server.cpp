@@ -1,16 +1,17 @@
 #include "server.hpp"
 
 
+const char* DEFAULT_PORT = "8371";
 pthread_mutex_t lock;
 int totalConnectedClients = 0;
 int socketDescriptors[MAX_CONNECTIONS];
 json jtoSend;
 vector<string> connectedUsers;
+
+
 int main(int argc, const char *argv[]) {
 
     jtoSend = makeJson(" ", " ", &connectedUsers, 1);
-
-
 
 	short PORT;
 	int socketDescriptor;
@@ -23,7 +24,8 @@ int main(int argc, const char *argv[]) {
 	validateInput(argc, argv);
 
 	if(argc == 1) {
-		argv[1] = "8371";
+		argv[1] = DEFAULT_PORT; 
+			//"8371";
 	}
 
 	//Initialize the mutex variable, lock.
@@ -35,17 +37,19 @@ int main(int argc, const char *argv[]) {
 	//Convert the given port into a short.
 	PORT = htons(atoi(argv[1]));
 
-	socketDescriptor = initConnection(&socketDescriptor, PORT);
-
-	if(socketDescriptor == -1){
+	if((socketDescriptor = initConnection(&socketDescriptor, PORT)) == -1) {
 		return -1;
 	}
+
+
+	// Create thread to update clients
 	pthread_t serverThread;
 	if(pthread_create(&serverThread , NULL , updateClients , NULL) != 0) {
 		printf("Pthread creation error!\n");
 		return -1; //Indicate FAILURE.
 	}
 
+	//Create threads to read from clients
 	while(1) {
 		pthread_t temp;
 		clientLength = sizeof(clientAddress);
@@ -130,8 +134,7 @@ void* clientThread(void* val) {
 
 			pushUnique(&connectedUsers, username);
 
-			pthread_mutex_lock(&lock);
-			
+			pthread_mutex_lock(&lock);	
 			jtoSend = makeJson(username, buffer, &connectedUsers, seqnum);
 			pthread_mutex_unlock(&lock);
 		}

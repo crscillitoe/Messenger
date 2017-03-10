@@ -24,6 +24,7 @@ using json = nlohmann::json;
 const int MAXUSERNAMESIZE = 16;
 const int MAX_CONNECTIONS = 50;
 
+
 // Function Prototypes
 
 int pushUnique(vector<string> *vec, string toAdd);
