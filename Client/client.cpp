@@ -48,7 +48,7 @@ int main(int argc, char* argv[])
 	string usr;
 	usr.assign(myUsername, strlen(myUsername));
 	string initialMessage = usr + " Has Joined the room";
-	json init = makeJson(myUsername, initialMessage, 0);
+	json init = makeJson("SYSTEM", initialMessage, 0);
 	if(sendJson(init, serverSocket)){
 		exit(1);
 	}
@@ -118,18 +118,3 @@ void* readThread(void* val) {
 	}
 }
 
-void clearConnectedUsers(){
-	int j;
-	for(j = 4; j < LINES-6; j++) {
-		mvprintw(j, COLS - 18 , "                 ");
-	}
-}
-
-void printConnectedUsers(vector<string> *users) {
-	int j = 0;
-	std::vector<string>::iterator itr;
-	for ( itr = (*users).begin(); itr != (*users).end(); ++itr ) {
-		mvprintw(j+4 , COLS - 18 ,  (*users)[j].c_str());
-		j++;
-	}
-}
