@@ -130,6 +130,11 @@ void* clientThread(void* val) {
 			running = 0;
 			//pop username
 			connectedUsers.erase(std::remove(connectedUsers.begin(), connectedUsers.end(), username), connectedUsers.end());	
+
+
+			pthread_mutex_lock(&lock);	
+			jtoSend = makeJson("SYSTEM", username + " HAS DISCONNECTED", &connectedUsers, seqnum);
+			pthread_mutex_unlock(&lock);
 		} else {
 
 			pushUnique(&connectedUsers, username);
