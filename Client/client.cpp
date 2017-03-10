@@ -28,9 +28,7 @@ int main(int argc, char* argv[])
 		char *ptr;
 		serverPort = strtol(str_port, &ptr, 10);
 
-	}
-	else
-	{
+	} else {
 		serverPort = 8371;
 	}
 
@@ -46,6 +44,14 @@ int main(int argc, char* argv[])
 	pthread_t thread;
 	pthread_create(&thread , NULL , readThread , (void*) &serverSocket);
 
+	drawScreen();
+	string usr;
+	usr.assign(myUsername, strlen(myUsername));
+	string initialMessage = usr + " Has Joined the room";
+	json init = makeJson(myUsername, initialMessage, 0);
+	if(sendJson(init, serverSocket)){
+		exit(1);
+	}
 	inputLoop(serverSocket, myUsername);
 
 	endwin();
@@ -105,9 +111,17 @@ void* readThread(void* val) {
 			mvprintw(LINES - (i + 6) , 2 , "%s" , lines[i].c_str());
 		}
 		drawLines();
+		clearConnectedUsers();
 		printConnectedUsers(&connectedUser);
 		move(LINES - 4 , 2);
 		refresh();
+	}
+}
+
+void clearConnectedUsers(){
+	int j;
+	for(j = 4; j < LINES-6; j++) {
+		mvprintw(j, COLS - 18 , "                 ");
 	}
 }
 

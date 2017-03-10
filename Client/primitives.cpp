@@ -5,11 +5,9 @@ int initConnection(unsigned short serverPort, char* url, int serverSocket) {
 	struct sockaddr_in serverAddr;
 	struct hostent *hp;
 	// Socket
-	if((serverSocket = socket(AF_INET, SOCK_STREAM, 0)) < 0)
-	{
+	if((serverSocket = socket(AF_INET, SOCK_STREAM, 0)) < 0){
 		fprintf(stderr, "Socket error: %s\n", strerror(errno));
 		exit(1);
-
 	}
 
 	// Initialize struct
@@ -17,11 +15,9 @@ int initConnection(unsigned short serverPort, char* url, int serverSocket) {
 	serverAddr.sin_family = AF_INET;
 	hp = gethostbyname(url);
 
-	if(hp == NULL)
-	{
+	if(hp == NULL){
 		fprintf(stderr, "Error: specified URL does not exist\n");
 		exit(1);
-
 	}
 
 	bcopy ( (char*)hp->h_addr,
@@ -30,15 +26,12 @@ int initConnection(unsigned short serverPort, char* url, int serverSocket) {
 	serverAddr.sin_port = htons(serverPort);
 
 	// Connect to server socket
-	if(connect(serverSocket, (struct sockaddr *) &serverAddr, sizeof(serverAddr)) < 0)
-	{
-
+	if(connect(serverSocket, (struct sockaddr *) &serverAddr, sizeof(serverAddr)) < 0){
 		fprintf(stderr, "Connect error: %s\n", strerror(errno));
 		exit(1);
 	}
 
 	return serverSocket;
-
 }
 
 int writeLine(string buffer, int linesUsed, string lines[]){
@@ -57,14 +50,11 @@ int writeLine(string buffer, int linesUsed, string lines[]){
 	return linesUsed;
 }
 
-
-
 void printn(const char* message) {
 	printf("%s\n" , message);
 }
 
 void drawScreen(){
-
 	int i;
 	for(i = 1 ; i < COLS ; i++) {
 		mvprintw(1 , i , "-");
@@ -73,7 +63,6 @@ void drawScreen(){
 	}
 
 	drawLines();
-
 	mvprintw(LINES - 4 , 1 , ">");
 }
 
@@ -93,24 +82,13 @@ void drawLines(){
 }
 
 void inputLoop(int sSocket, char* username) {
-
-
 	int ex = 0;
 	char userinput[2030];
 	memset(userinput, '\0', sizeof(userinput));
-	char message_to_send[2048];
-
-	memset(message_to_send, '\0', sizeof(message_to_send));
-	int seqnum = 0;
-	while(!ex)
-	{
-
-		drawScreen();
-
+	int seqnum = 1;
+	while(!ex){
 		bzero(userinput , 2030);
-		bzero(message_to_send, 2048);
 		getnstr(userinput , 2030);
-
 		userinput[strlen(userinput)] = '\n';
 
 		int i;
@@ -118,24 +96,16 @@ void inputLoop(int sSocket, char* username) {
 			mvprintw(LINES - 4 , i , " ");
 		}
 
-
-		if(strcmp(userinput, "EXIT\n") == 0)
-		{
+		if(strcmp(userinput, "EXIT\n") == 0){
 			cleanUpAndExit(0);
-
-			//  exit(0);
 		}
 
 		json wrap = makeJson(username, userinput, seqnum);
-
 		if(sendJson(wrap, sSocket)){
 			exit(1);
 		}
-
 		seqnum = !seqnum; 
 	}
-
-
 }
 
 int sendJson(json j, int socket){	
