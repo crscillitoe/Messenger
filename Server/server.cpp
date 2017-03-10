@@ -1,6 +1,4 @@
 #include "server.hpp"
-#include "json.hpp"
-using json = nlohmann::json;
 
 
 pthread_mutex_t lock;
@@ -10,7 +8,7 @@ json jtoSend;
 vector<string> connectedUsers;
 int main(int argc, const char *argv[]) {
 
-	initJson();
+    jtoSend = makeJson(" ", " ", &connectedUsers, 1);
 
 
 
@@ -96,15 +94,6 @@ void* updateClients(void*) {
 	}
 }
 
-
-
-void initJson(){
-	jtoSend["username"] = " ";
-	jtoSend["seqnum"] = 1;
-	jtoSend["message"] = " ";
-	jtoSend["users"] = " ";
-}
-
 void* clientThread(void* val) {
 	int MAX_MESSAGE_SIZE = 2048;
 	char bufferRead[MAX_MESSAGE_SIZE];
@@ -140,15 +129,18 @@ void* clientThread(void* val) {
 		if(buffer == "EXIT\n"){
 			running = 0;
 			//pop username
+			connectedUsers.erase(std::remove(connectedUsers.begin(), connectedUsers.end(), username), connectedUsers.end());	
 		} else {
 
 			pushUnique(&connectedUsers, username);
 
 			pthread_mutex_lock(&lock);
-			jtoSend["username"] = username;
-			jtoSend["users"] = connectedUsers;
-			jtoSend["message"] = buffer; //CPPString;
-			jtoSend["seqnum"] = seqnum;
+			
+			jtoSend = makeJson(username, buffer, &connectedUsers, seqnum);
+	//		jtoSend["username"] = username;
+	//		jtoSend["users"] = connectedUsers;
+	//		jtoSend["message"] = buffer; //CPPString;
+	//		jtoSend["seqnum"] = seqnum;
 			pthread_mutex_unlock(&lock);
 		}
 	}
@@ -174,4 +166,14 @@ void* clientThread(void* val) {
 	close(SOCKET_ID);
 
 	return NULL;
+}
+
+
+json makeJson(string user, string message, vector<string> *vec, int seqnum){
+	json wrap;
+	wrap["username"] = user;
+	wrap["message"] = message;
+	wrap["users"] = *vec;
+	wrap["seqnum"] = seqnum;
+	return wrap;
 }

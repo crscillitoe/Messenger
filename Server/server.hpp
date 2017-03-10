@@ -15,8 +15,11 @@
 #include <netdb.h>
 #include <pthread.h>
 #include <string>
+#include <algorithm>
 #include <vector>
+#include "json.hpp"
 using namespace std;
+using json = nlohmann::json;
 // Globals
 const int MAXUSERNAMESIZE = 16;
 const int MAX_CONNECTIONS = 50;
@@ -27,7 +30,8 @@ int pushUnique(vector<string> *vec, string toAdd);
 void  allocateArray(char** arr, int num_elements, int sizeof_elements);
 void* updateClients(void* val);
 void* clientThread(void* val);
-void initJson();
 void validateInput(int argc, const char* argv[]);
 int initConnection(int* sd, short PORT);
+
+json makeJson(string user, string message, vector<string> *vec, int seqnum);
 #endif
