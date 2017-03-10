@@ -88,7 +88,7 @@ void inputLoop(int sSocket, char* username) {
 	int seqnum = 1;
 	while(!ex){
 		bzero(userinput , 2030);
-		getnstr(userinput , 2030);
+		mvgetnstr(LINES-4, 2, userinput , 2030);
 		userinput[strlen(userinput)] = '\n';
 
 		int i;

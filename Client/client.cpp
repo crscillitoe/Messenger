@@ -77,8 +77,8 @@ void* readThread(void* val) {
 	char buffer[MAX_MESSAGE_LENGTH];
 
 	const int MAX_POSSIBLE_LINES_REMEMBER = 100;
-	string lines[MAX_POSSIBLE_LINES_REMEMBER];
 	const int lineLength = (COLS - 22);
+	string lines[MAX_POSSIBLE_LINES_REMEMBER];
 	int linesUsed = 0;
 	json recv;
 
@@ -102,7 +102,6 @@ void* readThread(void* val) {
 			for(c = 0 ; c < linesToAdd ; c++) {
 				linesUsed = writeLine(buff.substr(c * lineLength , lineLength), linesUsed, lines);
 			}
-
 		}
 		
 		//DRAW TO NCURSES
