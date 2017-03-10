@@ -71,21 +71,15 @@ void* updateClients(void*) {
 	string currentUser;
 	int currentSeqNum = 0;
 
-	string toSend;
 	while(1) {
-
 		usleep(5000);
 		pthread_mutex_lock(&lock);
 
-		toSend = jtoSend.dump();
-
-
-		if(currentSeqNum != jtoSend["seqnum"] || (jtoSend["username"] != currentUser))
-		{ //If the messages are different
+		if(currentSeqNum != jtoSend["seqnum"] || (jtoSend["username"] != currentUser)){
+			//If the messages are different
 			int i;
-			printf("UPDATECLIENTS TOSEND: %s\n" , toSend.c_str());
 			for(i = 0 ; i < totalConnectedClients ; i++) {
-				write(socketDescriptors[i] , toSend.c_str(), toSend.length());
+				sendJson(jtoSend, socketDescriptors[i]);
 			}
 			currentUser = jtoSend["username"];
 			currentSeqNum = jtoSend["seqnum"];
@@ -93,6 +87,8 @@ void* updateClients(void*) {
 		pthread_mutex_unlock(&lock);
 	}
 }
+
+
 
 void* clientThread(void* val) {
 	int MAX_MESSAGE_SIZE = 2048;
@@ -137,10 +133,6 @@ void* clientThread(void* val) {
 			pthread_mutex_lock(&lock);
 			
 			jtoSend = makeJson(username, buffer, &connectedUsers, seqnum);
-	//		jtoSend["username"] = username;
-	//		jtoSend["users"] = connectedUsers;
-	//		jtoSend["message"] = buffer; //CPPString;
-	//		jtoSend["seqnum"] = seqnum;
 			pthread_mutex_unlock(&lock);
 		}
 	}
@@ -169,11 +161,3 @@ void* clientThread(void* val) {
 }
 
 
-json makeJson(string user, string message, vector<string> *vec, int seqnum){
-	json wrap;
-	wrap["username"] = user;
-	wrap["message"] = message;
-	wrap["users"] = *vec;
-	wrap["seqnum"] = seqnum;
-	return wrap;
-}

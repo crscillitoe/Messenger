@@ -61,3 +61,25 @@ void validateInput(int argc, const char* argv[]){
 		exit(1);
 	}
 }
+
+
+
+int sendJson(json j, int socket){	
+		string toSendcpp = j.dump();
+		const char* toSend = toSendcpp.c_str();
+		if(write(socket, toSend, strlen(toSend)) < 0)
+		{
+			fprintf(stderr, "Write returned an error: %s\n", strerror(errno));
+			return -1;
+		}
+		return 0;
+}
+
+json makeJson(string user, string message, vector<string> *vec, int seqnum){
+	json wrap;
+	wrap["username"] = user;
+	wrap["message"] = message;
+	wrap["users"] = *vec;
+	wrap["seqnum"] = seqnum;
+	return wrap;
+}
