@@ -24,9 +24,15 @@ using json = nlohmann::json;
 const int MAXUSERNAMESIZE = 16;
 const int MAX_CONNECTIONS = 50;
 
+//Structs
+
+typedef struct _connected {
+	int totalConnectedClients;
+	int socketDescriptors[MAX_CONNECTIONS];
+} clients;
+
 
 // Function Prototypes
-
 int pushUnique(vector<string> *vec, string toAdd);
 void  allocateArray(char** arr, int num_elements, int sizeof_elements);
 void* updateClients(void* val);

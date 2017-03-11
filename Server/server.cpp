@@ -3,11 +3,9 @@
 
 const char* DEFAULT_PORT = "8371";
 pthread_mutex_t lock;
-int totalConnectedClients = 0;
-int socketDescriptors[MAX_CONNECTIONS];
 json jtoSend;
 vector<string> connectedUsers;
-
+clients connections;
 
 int main(int argc, const char *argv[]) {
 
@@ -15,7 +13,6 @@ int main(int argc, const char *argv[]) {
 
 	short PORT;
 	int socketDescriptor;
-
 	struct sockaddr_in clientAddress;
 	unsigned int clientLength;
 	int clientSocket;
@@ -25,7 +22,6 @@ int main(int argc, const char *argv[]) {
 
 	if(argc == 1) {
 		argv[1] = DEFAULT_PORT; 
-			//"8371";
 	}
 
 	//Initialize the mutex variable, lock.
@@ -82,8 +78,8 @@ void* updateClients(void*) {
 		if(currentSeqNum != jtoSend["seqnum"] || (jtoSend["username"] != currentUser)){
 			//If the messages are different
 			int i;
-			for(i = 0 ; i < totalConnectedClients ; i++) {
-				sendJson(jtoSend, socketDescriptors[i]);
+			for(i = 0 ; i < connections.totalConnectedClients ; i++) {
+				sendJson(jtoSend, connections.socketDescriptors[i]);
 			}
 			currentUser = jtoSend["username"];
 			currentSeqNum = jtoSend["seqnum"];
@@ -108,8 +104,8 @@ void* clientThread(void* val) {
 	int running = 1;
 
 	pthread_mutex_lock(&lock);
-	socketDescriptors[totalConnectedClients] = SOCKET_ID;
-	totalConnectedClients++;
+	connections.socketDescriptors[connections.totalConnectedClients] = SOCKET_ID;
+	connections.totalConnectedClients++;
 	pthread_mutex_unlock(&lock);
 
 	while(running) {
@@ -119,8 +115,7 @@ void* clientThread(void* val) {
 		printf("Buffer Read : %s\n", bufferRead);
 		auto wrap = json::parse(bufferRead);
 
-		if(wrap["seqnum"] != seqnum)
-		{
+		if(wrap["seqnum"] != seqnum){
 			seqnum = wrap["seqnum"];
 		}
 		username = wrap["username"];
@@ -131,9 +126,8 @@ void* clientThread(void* val) {
 			//pop username
 			connectedUsers.erase(std::remove(connectedUsers.begin(), connectedUsers.end(), username), connectedUsers.end());	
 
-
 			pthread_mutex_lock(&lock);	
-			jtoSend = makeJson("SYSTEM", username + " HAS DISCONNECTED", &connectedUsers, seqnum);
+			jtoSend = makeJson("SYSTEM", username + " HAS DISCONNECTED\n", &connectedUsers, seqnum);
 			pthread_mutex_unlock(&lock);
 		} else {
 
@@ -146,22 +140,21 @@ void* clientThread(void* val) {
 	}
 
 	pthread_mutex_lock(&lock);
-	totalConnectedClients--;
+	connections.totalConnectedClients--;
 	int i;
-	int location = 5000;
+	int location = MAX_CONNECTIONS;
 	for(i = 0 ; i < MAX_CONNECTIONS - 1 ; i++) {
-		if(socketDescriptors[i] == SOCKET_ID) {
+		if(connections.socketDescriptors[i] == SOCKET_ID) {
 			location = i;
 			break;
 		}
 	}
 	for(i = location ; i < MAX_CONNECTIONS ; i++) {
-		socketDescriptors[i] = socketDescriptors[i + 1];
+		connections.socketDescriptors[i] = connections.socketDescriptors[i + 1];
 	}
 	pthread_mutex_unlock(&lock);
 
 	printf("Child with Socket ID %d has disconnected!\n" , SOCKET_ID);
-
 	shutdown(SOCKET_ID , SHUT_RDWR);
 	close(SOCKET_ID);
 
