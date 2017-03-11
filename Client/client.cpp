@@ -27,7 +27,6 @@ int main(int argc, char* argv[])
 		// Convert Port from string to short
 		char *ptr;
 		serverPort = strtol(str_port, &ptr, 10);
-
 	} else {
 		serverPort = 8371;
 	}
@@ -47,8 +46,8 @@ int main(int argc, char* argv[])
 	drawScreen();
 	string usr;
 	usr.assign(myUsername, strlen(myUsername));
-	string initialMessage = usr + " Has Joined the room";
-	json init = makeJson("SYSTEM", initialMessage, 0);
+	string initialMessage = usr + " Has Joined the room\n";
+	json init = makeJson(usr, initialMessage, 0);
 	if(sendJson(init, serverSocket)){
 		exit(1);
 	}
