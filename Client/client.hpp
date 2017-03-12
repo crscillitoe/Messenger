@@ -37,6 +37,7 @@ int initConnection(unsigned short serverPort, char* url, int serverSocket);
 void drawScreen();
 void drawLines();
 
+void sendInitialMessage(char* myUsername, int serverSocket);
 void clearConnectedUsers();
 int writeLine(string buffer, int linesUsed, string lines[]);
 void inputLoop(int sSocket, char* username);

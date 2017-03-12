@@ -46,13 +46,13 @@ int main(int argc, char* argv[]){
 	sendInitialMessage(myUsername, serverSocket);
 
 	inputLoop(serverSocket, myUsername);
+
 	endwin();
 
-	//if(pthread_join(thread , NULL)) {
-	//	printf("Error joining threads.\n");
-	//}
-
-	cleanUpAndExit(0);
+	if(pthread_join(thread , NULL)) {
+		printf("Error joining threads.\n");
+	}
+	//  free(s);
 }
 
 
@@ -65,8 +65,8 @@ void cleanUpAndExit(int){
 	}
 
 
-//	shutdown(serverSocket, 0);
-//	close(serverSocket);
+	shutdown(serverSocket, 0);
+	close(serverSocket);
 }
 
 void* readThread(void* val) {
@@ -86,20 +86,17 @@ void* readThread(void* val) {
 		bzero(buffer , MAX_MESSAGE_LENGTH);
 		read(socketID , buffer , MAX_MESSAGE_LENGTH);
 
-		//Parse the json received
 		auto recv = json::parse(buffer);
 		string username = recv["username"];
 		string message = recv["message"];
 		std::vector<string> connectedUser = recv["users"];
 
-		//Create message to print
 		string buff = username + ": " + message;
 
-		//Add new message to th lines buffer
 		int bufferSize = buff.length();
-		if(bufferSize <= lineLength) { //one line message
+		if(bufferSize <= lineLength) {
 			linesUsed = writeLine(buff, linesUsed, lines);
-		} else if(bufferSize > lineLength) { //two line message
+		} else if(bufferSize > lineLength) {
 			int linesToAdd = (bufferSize / lineLength) + 1;
 			int c;
 			for(c = 0 ; c < linesToAdd ; c++) {

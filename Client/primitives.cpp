@@ -1,5 +1,6 @@
 #include "client.hpp"
 
+//Initialize the connectsion with the remote server
 int initConnection(unsigned short serverPort, char* url, int serverSocket) {
 
 	struct sockaddr_in serverAddr;
@@ -34,6 +35,7 @@ int initConnection(unsigned short serverPort, char* url, int serverSocket) {
 	return serverSocket;
 }
 
+//add a line to the display buffer (lines) without going over maxmum lines
 int writeLine(string buffer, int linesUsed, string lines[]){
 	
 	const int linesToRemember = (LINES - 7);
@@ -54,6 +56,7 @@ void printn(const char* message) {
 	printf("%s\n" , message);
 }
 
+// Draw the ncurses message window
 void drawScreen(){
 	int i;
 	for(i = 1 ; i < COLS ; i++) {
@@ -66,6 +69,7 @@ void drawScreen(){
 	mvprintw(LINES - 4 , 1 , ">");
 }
 
+//Draw the ncurses columns
 void drawLines(){
 
 	int i;
@@ -81,6 +85,7 @@ void drawLines(){
 	mvprintw(3 , COLS - 20 , "--------------------");
 }
 
+//Ask the user for input to send to the server
 void inputLoop(int sSocket, char* username) {
 	int ex = 0;
 	char userinput[2030];
@@ -97,7 +102,8 @@ void inputLoop(int sSocket, char* username) {
 		}
 
 		if(strcmp(userinput, "EXIT\n") == 0){
-			cleanUpAndExit(0);
+			return;
+			//cleanUpAndExit(0);
 		}
 
 		json wrap = makeJson(username, userinput, seqnum);
@@ -108,6 +114,7 @@ void inputLoop(int sSocket, char* username) {
 	}
 }
 
+//Send the given json to the given connected socket
 int sendJson(json j, int socket){	
 	string toSendcpp = j.dump();
 	const char* toSend = toSendcpp.c_str();
@@ -119,6 +126,7 @@ int sendJson(json j, int socket){
 	return 0;
 }
 
+//Compile raw inputs into a json
 json makeJson(string user, string message, int seqnum){
 	json wrap;
 	wrap["username"] = user;
@@ -127,6 +135,7 @@ json makeJson(string user, string message, int seqnum){
 	return wrap;
 }
 
+//Clear the "connected users" section of the screen between messages
 void clearConnectedUsers(){
 	int j;
 	for(j = 4; j < LINES-6; j++) {
@@ -134,11 +143,23 @@ void clearConnectedUsers(){
 	}
 }
 
+//Print all the currently connected users
 void printConnectedUsers(vector<string> *users) {
 	int j = 0;
 	std::vector<string>::iterator itr;
 	for ( itr = (*users).begin(); itr != (*users).end(); ++itr ) {
 		mvprintw(j+4 , COLS - 18 ,  (*users)[j].c_str());
 		j++;
+	}
+}
+
+//Let the server know that you have joined the room
+void sendInitialMessage(char* myUsername, int serverSocket){
+	string usr;
+	usr.assign(myUsername, strlen(myUsername));
+	string initialMessage = usr + " Has Joined the room\n";
+	json init = makeJson(usr, initialMessage, 0);
+	if(sendJson(init, serverSocket)){
+		exit(1);
 	}
 }
