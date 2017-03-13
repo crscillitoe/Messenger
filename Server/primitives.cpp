@@ -4,6 +4,28 @@
 using namespace std;
 
 
+void addConnection(clients *c, int sid){
+	c->socketDescriptors[c->totalConnectedClients] = sid;
+	c->totalConnectedClients++;
+}
+
+
+void removeConnection(clients *c, int sid){
+
+	c->totalConnectedClients--;
+	int i;
+	int location = MAX_CONNECTIONS;
+	for(i = 0 ; i < MAX_CONNECTIONS - 1 ; i++) {
+		if(c->socketDescriptors[i] == sid) {
+			location = i;
+			break;
+		}
+	}
+	for(i = location ; i < MAX_CONNECTIONS ; i++) {
+		c->socketDescriptors[i] = c->socketDescriptors[i + 1];
+	}
+}
+
 int pushUnique(vector<string> *vec, string toAdd){
 	std::vector<string>::iterator itr;
 	for(itr = (*vec).begin(); itr != (*vec).end(); ++itr) {

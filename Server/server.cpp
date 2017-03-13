@@ -104,8 +104,9 @@ void* clientThread(void* val) {
 	int running = 1;
 
 	pthread_mutex_lock(&lock);
-	connections.socketDescriptors[connections.totalConnectedClients] = SOCKET_ID;
-	connections.totalConnectedClients++;
+	addConnection(&connections, SOCKET_ID);
+	//connections.socketDescriptors[connections.totalConnectedClients] = SOCKET_ID;
+	//connections.totalConnectedClients++;
 	pthread_mutex_unlock(&lock);
 
 	while(running) {
@@ -132,7 +133,6 @@ void* clientThread(void* val) {
 		} else {
 
 			pushUnique(&connectedUsers, username);
-
 			pthread_mutex_lock(&lock);	
 			jtoSend = makeJson(username, buffer, &connectedUsers, seqnum);
 			pthread_mutex_unlock(&lock);
@@ -140,18 +140,7 @@ void* clientThread(void* val) {
 	}
 
 	pthread_mutex_lock(&lock);
-	connections.totalConnectedClients--;
-	int i;
-	int location = MAX_CONNECTIONS;
-	for(i = 0 ; i < MAX_CONNECTIONS - 1 ; i++) {
-		if(connections.socketDescriptors[i] == SOCKET_ID) {
-			location = i;
-			break;
-		}
-	}
-	for(i = location ; i < MAX_CONNECTIONS ; i++) {
-		connections.socketDescriptors[i] = connections.socketDescriptors[i + 1];
-	}
+	removeConnection(&connections, SOCKET_ID);
 	pthread_mutex_unlock(&lock);
 
 	printf("Child with Socket ID %d has disconnected!\n" , SOCKET_ID);

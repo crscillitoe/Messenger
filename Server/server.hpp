@@ -41,4 +41,6 @@ void validateInput(int argc, const char* argv[]);
 int initConnection(int* sd, short PORT);
 int sendJson(json j, int socket);
 json makeJson(string user, string message, vector<string> *vec, int seqnum);
+void addConnection(clients *c, int sid);
+void removeConnection(clients *c, int sid);
 #endif
