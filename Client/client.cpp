@@ -7,20 +7,20 @@ int serverSocket;
 char* myUsername; 
 int main(int argc, char* argv[]){
 
+	char* url = "ec2-35-164-26-58.us-west-2.compute.amazonaws.com";
 	unsigned short serverPort;
 	char* str_port; 
-	char* url; 
 
 	signal(SIGINT, cleanUpAndExit);
 
 	//validate inputs
-	if(argc < 3 || argc > 5){
-		fprintf(stderr, "Usage %s serverIP USERNAME [-p PORT]\n", argv[0]);
+	if(argc < 2 || argc > 4){
+		fprintf(stderr, "Usage %s USERNAME [-p PORT]\n", argv[0]);
 		exit(1);
 	}
 
 	//Set custom port
-	if(argc == 5){
+	if(argc == 4){
 		str_port = argv[4];
 		// Convert Port from string to short
 		char *ptr;
@@ -29,8 +29,8 @@ int main(int argc, char* argv[]){
 		serverPort = 8371;
 	}
 
-	myUsername = argv[2];
-	url = argv[1];
+	myUsername = argv[1];
+	//url = IP;
 
 	//Make the connection with the server
 	serverSocket = initConnection(serverPort, url, serverSocket);
