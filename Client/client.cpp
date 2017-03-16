@@ -42,7 +42,7 @@ int main(int argc, char* argv[]){
 	pthread_t thread;
 	pthread_create(&thread , NULL , readThread , (void*) &serverSocket);
 
-	drawScreen();
+	//drawScreen();
 	sendInitialMessage(myUsername, serverSocket);
 
 	inputLoop(serverSocket, myUsername);

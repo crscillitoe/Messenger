@@ -59,10 +59,18 @@ void printn(const char* message) {
 // Draw the ncurses message window
 void drawScreen(){
 	int i;
+
+	mvprintw(LINES - 5 , 0 , " ");
+	mvprintw(LINES - 3 , 0 , " ");
 	for(i = 1 ; i < COLS ; i++) {
 		mvprintw(1 , i , "-");
 		mvprintw(LINES - 5 , i , "-");
 		mvprintw(LINES - 3 , i , "-");
+		if(i != 1 && i != COLS-20 && i != COLS -1) {
+			mvprintw(LINES - 2 , i , " ");
+			mvprintw(LINES - 1 , i , " ");
+		}
+
 	}
 
 	drawLines();
@@ -75,6 +83,7 @@ void drawLines(){
 	int i;
 	for(i = 2 ; i < LINES ; i++) {
 		if(i != LINES-5 && i != LINES-4 && i != LINES-3) {
+			mvprintw(i , 0 , " ");
 			mvprintw(i , 1 , "|");
 			mvprintw(i , COLS - 1, "|");
 			mvprintw(i , COLS - 20 , "|");
@@ -92,6 +101,7 @@ void inputLoop(int sSocket, char* username) {
 	memset(userinput, '\0', sizeof(userinput));
 	int seqnum = 1;
 	while(!ex){
+		drawScreen();
 		bzero(userinput , 2030);
 		mvgetnstr(LINES-4, 2, userinput , 2030);
 		userinput[strlen(userinput)] = '\n';
