@@ -46,7 +46,7 @@ int main(int argc, char* argv[]){
 	sendInitialMessage(myUsername, serverSocket);
 
 	inputLoop(serverSocket, myUsername);
-	//endwin();
+	endwin();
 
 	//if(pthread_join(thread , NULL)) {
 	//	printf("Error joining threads.\n");
@@ -63,8 +63,10 @@ void cleanUpAndExit(int){
 	if(sendJson(wrap, serverSocket)){
 		fprintf(stderr, "Could not send EXIT message\n");
 	}
-	endwin();
-	exit(0);
+
+
+//	shutdown(serverSocket, 0);
+//	close(serverSocket);
 }
 
 void* readThread(void* val) {
